@@ -5,13 +5,13 @@ import csv
 
 i = 0
 
-dat = np.genfromtxt('Data_N_alpha_SNR8_9_10_11_12_13_det.csv', delimiter=',')
+dat = np.genfromtxt('Data_N_gamma_SNR8_9_10_11_12_13_det.csv', delimiter=',')
 
-file1 = open('Data_N_alpha_SNR8_9_10_11_12_13_det.csv', 'r')
-file2 = open('dat_6det_yr_N_alpha_SNR8_9_10_11_12_13.csv', 'w')
+file1 = open('Data_N_gamma_SNR8_9_10_11_12_13_det.csv', 'r')
+file2 = open('dat_6det_yr_N_gamma_SNR8_9_10_11_12_13.csv', 'w')
 rfil = csv.writer(file2)
 
-rfil.writerow(['N','alpha', 'frac det>SNR8', 'frac det>SNR9', 'frac det>SNR10', 'frac det>SNR11', 'frac det>SNR12', 'frac det>SNR13'])
+rfil.writerow(['N','gamma', 'frac det>SNR8', 'frac det>SNR9', 'frac det>SNR10', 'frac det>SNR11', 'frac det>SNR12', 'frac det>SNR13'])
 
 AvN = []
 lin = file1.readline()

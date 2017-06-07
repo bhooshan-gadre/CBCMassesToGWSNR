@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 
 i = 0
 
-dat = np.genfromtxt('dat_6det_yr_N_alpha_SNR8_9_10_11_12_13.csv', delimiter=',')
+dat = np.genfromtxt('dat_6det_yr_N_gamma_SNR8_9_10_11_12_13.csv', delimiter=',')
 
-file1 = open('dat_6det_yr_N_alpha_SNR8_9_10_11_12_13.csv', 'r')
+file1 = open('dat_6det_yr_N_gamma_SNR8_9_10_11_12_13.csv', 'r')
 
 AvN = []
 lin = file1.readline()
@@ -43,8 +43,8 @@ plt.xticks(np.linspace(4, 22, 10))
 plt.yticks(np.arange(-3.2, 3.4, 0.4))
 plt.axis([4, 22, -3.2, 3.2])
 plt.xlabel('No of injections (N)')
-plt.ylabel('Alpha')
-plt.title('Alpha vs N (for constraint of 6 detections/yr having SNR>13)')
+plt.ylabel('Gamma')
+plt.title('Gamma vs N (for constraint of 6 detections/yr having SNR>13)')
 
 plt.show()
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           

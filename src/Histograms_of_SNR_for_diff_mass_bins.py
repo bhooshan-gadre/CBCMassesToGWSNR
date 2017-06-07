@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 
 Msun = 1.989e30
 
-
 dat = np.genfromtxt('Data_r_M_chirpM_Mratio_SNR.csv', delimiter=',')    # Reading data into an array
 
 def Calc_for(M_l, M_up):
@@ -25,7 +24,7 @@ def Calc_for(M_l, M_up):
         i += 1
     
     M1 = np.array(M1)
-    wt_M = M1 ** alpha
+    wt_M = M1 ** gamma
     SNR1 = np.array(SNR1)
 
     mean1 = np.average(SNR1)
@@ -48,7 +47,7 @@ def Normalise(Mat):
     return Mat[0], Mat[1], Mat[2], Mat[3], Mat[4]
 
 
-alpha = -5./6.
+gamma = -5./6.
 
 mean1, med1, var1, n1, bin1 = Calc_for(10., 28.)
 mean2, med2, var2, n2, bin2 = Calc_for(28., 46.)
