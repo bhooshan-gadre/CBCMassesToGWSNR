@@ -21,9 +21,9 @@ def calc_plot(Mat):
 	tolrnc = Mat[5]
 
 	M1 = M2 = np.ones(len(r)) * ML * Msun
-	alpha = np.array([np.pi])
-	delta = np.array([np.pi/2.])
-	iota = np.array([np.pi/2.])
+	alpha = np.array([Mat[9]])
+	delta = np.array([Mat[10]])
+	iota = np.array([Mat[11]])
 	
 	SNR  = find_SNR(M1, M2, r, alpha, delta, iota)
 
@@ -49,7 +49,8 @@ def calc_plot(Mat):
 r = np.linspace(100, 5000, 1001)
 r *= Mpc
 
-Mats = [[60., 50., 0., 3000., 300., 1., 50., 4., 'Lower Cutoff'], [5., 5., 0., 5000., 100., 0.005, 70., 4., 'Higher Cutoff']]
+Mats = [[60., 50., 0., 3000., 300., 0.7, 50., 4., 'Lower Cutoff', 0., 0., np.pi], [5., 5., 0., 5000., 100., 0.01, 70., 4., 'Higher Cutoff', 0., 0., np.pi]]
+		# [[60., 50., 0., 3000., 300., 0.1, 50., 4., 'Lower Cutoff', sky_lookup[4844, 0], sky_lookup[4844, 1], np.pi], [5., 5., 0., 5000., 100., 0.2, 70., 4., 'Higher Cutoff', sky_lookup[17039, 0], sky_lookup[17039, 1], np.pi/2.]]
 
 calc_plot(Mats[0])
 calc_plot(Mats[1])
