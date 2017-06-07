@@ -59,8 +59,9 @@ Md = 1000
 vol = 4. / 3. * np.pi * (ru ** 3. - rl ** 3.)
 
 # Ns = np.random.poisson(lam = 17.6, size = 2000)
-Ns = np.arange(5., 55., 1.)     #np.array([10.])
-alphas = np.arange(-3., 3., 0.1)    #np.array([-1.])
+Ns = np.array([10., 11.])    #np.arange(5., 55., 1.)
+alphas = np.array([-1., 0.])    #np.arange(-3., 3., 0.1)
+Iters = 100
 
 # Arrays
 v = np.linspace(0., vol, Md)
@@ -79,7 +80,7 @@ for N in Ns:
 
     for alpha in alphas:
 
-        for j in range(100):
+        for j in range(Iters):
             # timer = time.time()
             a = []
             M1 = np.random.uniform(5. * Msun, 50. * Msun, Md)
