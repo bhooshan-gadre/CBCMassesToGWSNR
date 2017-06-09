@@ -3,11 +3,11 @@ import matplotlib.pyplot as plt
 
 Msun = 1.989e30
 
-dat = np.genfromtxt('Data_r_M_chirpM_Mratio_SNR.csv', delimiter=',')    # Reading data into an array
+dat = np.genfromtxt('Data_M1_M2_M_r_alpha_delta_iota_SNR.csv', delimiter=',')    # Reading data into an array
 
 def Calc_for(M_l, M_up):
-    i = 1
-    file1 = open('Data_r_M_chirpM_Mratio_SNR.csv', 'r')        # Only for checking end of file
+    i = 0
+    file1 = open('Data_M1_M2_M_r_alpha_delta_iota_SNR.csv', 'r')        # Only for checking end of file
     SNR1 = []
     M1 = []
     lin = file1.readline()
@@ -17,9 +17,9 @@ def Calc_for(M_l, M_up):
         if not lin:
             break
 
-        if (dat[i, 1] > M_l) and (dat[i, 1] <= M_up):
-            M1.append(dat[i, 1])
-            SNR1.append(dat[i, 4])
+        if (dat[i, 2] > M_l*Msun) and (dat[i, 2] <= M_up*Msun):
+            M1.append(dat[i, 2])
+            SNR1.append(dat[i, 7])
 
         i += 1
     
@@ -56,6 +56,26 @@ mean4, med4, var4, n4, bin4 = Calc_for(64., 82.)
 mean5, med5, var5, n5, bin5 = Calc_for(82., 100.)
 
 n1, n2, n3, n4, n5 = Normalise([n1, n2, n3, n4, n5])
+
+frac8 = np.array([np.sum(n1[8:1000]), np.sum(n2[8:1000]), np.sum(n3[8:1000]), np.sum(n4[8:1000]), np.sum(n5[8:1000])])
+frac13 = np.array([np.sum(n1[13:1000]), np.sum(n2[13:1000]), np.sum(n3[13:1000]), np.sum(n4[13:1000]), np.sum(n5[13:1000])])
+
+frac8 /= np.sum(frac8)
+frac13 /= np.sum(frac13)
+
+
+plt.figure()
+plt.plot(np.arange(10., 100., 18.), frac8, 'ko-',  label='>SNR8')
+plt.plot(np.arange(10., 100., 18.), frac13, 'ro-', label='>SNR13')
+
+plt.xlabel('Total Mass')
+plt.ylabel('Fraction of detections out of total no of detections')
+plt.title('Fraction of detections above SNR8 and SNR13')
+plt.grid(True)
+plt.xticks(np.linspace(0., 100., 11))
+#plt.yticks(np.linspace(0., 0.5, 11))
+#plt.axis([0., 100., 0., 0.7])
+plt.legend(loc='upper right')
 
 
 plt.figure()

@@ -3,13 +3,11 @@ import csv
 import matplotlib.pyplot as plt
 import time
 
-start_time = time.time()
-
-print("Start Time: %s seconds" % (time.time() - start_time))
+start_time1 = time.time()
 
 # Input
-rl =  * Mpc
-ru =  * Mpc
+rl = 648.8 * Mpc
+ru = 2030.6 * Mpc
 Md = 1000
 vol = 4. / 3. * np.pi * (ru ** 3. - rl ** 3.)
 
@@ -21,21 +19,25 @@ r **= (1. / 3.)
 
 # Last column will be detections above SNR 13. We have to compare it to the expected value 6 per year
 title = 'N, gamma, frac det>SNR8, frac det>SNR9, frac det>SNR10, frac det>SNR11, frac det>SNR12, frac det>SNR13, det>SNR13'   
-rf = open('Data_N_gamma_SNR8_9_10_11_12_13_det.csv', 'w')   
+file1 = open('Data_N_gamma_SNR8_9_10_11_12_13_det.csv', 'w')
 
-Ns = np.array([10., 11.])    #np.arange(5., 55., 1.)
-gammas = np.array([-1., 0.])    #np.arange(-3., 3., 0.1)
+Ns = np.arange(5., 50., 1.)
+gammas = np.arange(-3., 1., 0.1)
 Iters = 100
 
-a = np.zeros([Iters*len(Ns)*len(gammas), 9])
+data = np.zeros([Iters*len(Ns)*len(gammas), 9])
 counter = 0
+Tot_its = len(Ns) * len(gammas) * Iters
 
 for N in Ns:
 
       for gamma in gammas:
 
             for j in range(Iters):
-                  # timer2 = time.time()
+
+                  if counter < 1: timer = time.time()
+
+                  timer2 = time.time()
                   M1 = np.random.uniform(5. * Msun, 50. * Msun, Md)
                   M2 = np.random.uniform(5. * Msun, 50. * Msun, Md)
                   alpha = np.random.uniform(0., 2.*np.pi, Md)
@@ -50,20 +52,35 @@ for N in Ns:
                   n, bins = np.histogram(SNR, bins=np.linspace(0., 60., 61), weights=wt_M, density=True)
 
                   # Calculating the fraction of area above a specific SNR value
-                  a[counter][0] = N
-                  a[counter][1] = gamma
-                  a[counter][2] = np.sum(n[8:1000])
-                  a[counter][3] = np.sum(n[9:1000])
-                  a[counter][4] = np.sum(n[10:1000])
-                  a[counter][5] = np.sum(n[11:1000])
-                  a[counter][6] = np.sum(n[12:1000])
-                  a[counter][7] = np.sum(n[13:1000])
-                  a[counter][8] = a[j][7] * N
+                  data[counter][0] = N
+                  data[counter][1] = gamma
+                  data[counter][2] = np.sum(n[8:1000])
+                  data[counter][3] = np.sum(n[9:1000])
+                  data[counter][4] = np.sum(n[10:1000])
+                  data[counter][5] = np.sum(n[11:1000])
+                  data[counter][6] = np.sum(n[12:1000])
+                  data[counter][7] = np.sum(n[13:1000])
+                  data[counter][8] = data[j][7] * N
 
-                  print 'row: ', counter + 1
+                  # print 'row: ', counter + 1
                   counter += 1
-                  # print 'Time: ', time.time() - timer2
+                  if counter < 2: it_time = time.time() - timer
 
-np.savetxt(rf, a, delimiter=',', header=title, newline='\n')
-rf.close()
-print("End Time: %s seconds" % (time.time() - start_time))
+                  if counter % 100 == 0:
+                        print 'row: ', counter
+                        print 'Time remaining: ', (Tot_its - counter) * it_time / 3600, ' Hrs'
+
+np.savetxt(file1, data, delimiter=',', header=title, newline='\n')
+file1.close()
+print("Time taken for iterations and file saving: %s seconds" % (time.time() - start_time1))
+start_time2 = time.time()
+
+title2 = 'N, gamma, frac det>SNR8, frac det>SNR9, frac det>SNR10, frac det>SNR11, frac det>SNR12, frac det>SNR13'
+file2 = open('dat_6det_yr_N_gamma_SNR8_9_10_11_12_13.csv', 'w')
+
+data_6_det = data[np.where(data[:,8]>5.9)]
+data_6_det = data_6_det[np.where(data_6_det[:,8]<6.1)]
+
+np.savetxt(file2, data_6_det, delimiter=',', header=title2, newline='\n')
+file2.close()
+print("Time taken for next file saving: %s seconds" % (time.time() - start_time2))

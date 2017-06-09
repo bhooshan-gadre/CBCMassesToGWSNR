@@ -17,7 +17,7 @@ sky_lookup = np.genfromtxt('/home/shreejit/H1_allSky_antenna_patterns.dat')
 find_F_plus = interpolate.interp2d(sky_lookup[:,0], sky_lookup[:,1], sky_lookup[:,2])
 find_F_cross = interpolate.interp2d(sky_lookup[:,0], sky_lookup[:,1], sky_lookup[:,3])
 # Printing the time taken for reading and interpolation stuff
-print("Time to interpolate: %s seconds" % (time.time() - start_time))
+print("Time taken to interpolate: %s seconds" % (time.time() - start_time))
 
 
 # Constants
@@ -61,7 +61,7 @@ def find_simple_SNR(M1, M2, dist):
 	f_isco = c ** 3. / (6. ** 1.5 * np.pi * G * M)
 	# Now, finding the index of each ISCO freq in freq array
 	# the integrand values are to be summed till this index to get integration value
-	isco_index = (f_isco / df - freq[0]).astype(int) + 1
+	isco_index = ((f_isco - freq[0]) / df).astype(int)
 	
 	# Making an SNR matrix of required dimension and then substituting values
 	SNR = np.zeros(len(M))
@@ -105,11 +105,10 @@ def find_SNR(M1, M2, dist, alpha, delta, iota):
 	f_isco = c ** 3. / (6. ** 1.5 * np.pi * G * M)
 	# Now, finding the index of each ISCO freq in freq array
 	# the integrand values are to be summed till this index to get integration value
-	isco_index = (f_isco / df - freq[0]).astype(int) + 1
+	isco_index = ((f_isco - freq[0]) / df).astype(int)
 
 	# Making an SNR matrix of required dimension and then substituting values
 	SNR = np.zeros(len(M))
 	for ii in range(len(M)):
 		SNR[ii] = np.sqrt(4. * h_tilde[ii] * np.sum(integrand[:isco_index[ii]]))
 	return SNR
-
