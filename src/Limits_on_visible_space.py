@@ -8,8 +8,7 @@ def r_for_SNR(tol, val, x, y):
 	yy = y[np.where(y>(val-tol))]
 	# print np.where(yy<(val+tol))
 	return x[np.where(yy<(val+tol))]
-
-
+	
 # Main function which finds SNR, cutoff on distance and plots the graphs
 # Takes input as a matrix containing info: [SNRcutoff, M_BH, low_lim_x_axis, uppr_lim_x_axis, uppr_lim_y_axis, tolerance, offset for annotation in x, in y, annotation]
 def calc_plot(Mat):
@@ -19,14 +18,9 @@ def calc_plot(Mat):
 	x_L = Mat[3]
 	y_L = Mat[4]
 	tolrnc = Mat[5]
-
-	M1 = M2 = np.ones(len(r)) * ML * Msun
-	alpha = np.array([Mat[9]])
-	delta = np.array([Mat[10]])
-	iota = np.array([Mat[11]])
-	
-	SNR  = find_SNR(M1, M2, r, alpha, delta, iota)
-
+	M1 = np.ones(len(r)) * ML * Msun
+	M2 = np.ones(len(r)) * ML * Msun
+	SNR  = find_simple_SNR(M1, M2, r)
 	rL = r_for_SNR(tolrnc, cut, r, SNR)/Mpc
 	print '(', rL, ', ', cut, ')'
 
@@ -49,8 +43,7 @@ def calc_plot(Mat):
 r = np.linspace(100, 5000, 1001)
 r *= Mpc
 
-Mats = [[60., 50., 0., 3000., 300., 0.7, 50., 4., 'Lower Cutoff', 0., 0., np.pi], [5., 5., 0., 5000., 100., 0.01, 70., 4., 'Higher Cutoff', 0., 0., np.pi]]
-		# [[60., 50., 0., 3000., 300., 0.1, 50., 4., 'Lower Cutoff', sky_lookup[4844, 0], sky_lookup[4844, 1], np.pi], [5., 5., 0., 5000., 100., 0.2, 70., 4., 'Higher Cutoff', sky_lookup[17039, 0], sky_lookup[17039, 1], np.pi/2.]]
+Mats = [[60., 50., 0., 3000., 300., 0.2, 50., 4., 'Lower Cutoff'], [5., 5., 0., 5000., 100., 0.005, -700., 4., 'Higher Cutoff']]
 
 calc_plot(Mats[0])
 calc_plot(Mats[1])

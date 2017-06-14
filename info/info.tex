@@ -7,15 +7,46 @@
 \usepackage{amssymb}
 \usepackage{mathtools}
 \usepackage{hyperref}
+\usepackage{booktabs}
 \everymath{\displaystyle}
 %\usepackage{mathrsfs}\\
 \DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
 \numberwithin{equation}{section}
 % Start the document
 \begin{document}
+\section*{\normalsize{\textit{Abbott et. al.\\}}\small{GW170104: Observation of a 50-Solar-Mass Binary Black Hole Coalescence at Redshift 0.2}}
+The second observational run (O2) of aLIGO added 11 more days of coincident observation data and the detection of GW170104 to the observations made in first observational run (O1). Thus, improved BBH merger rate estimates have been obtained. Two simple models of population of BHs have been considered on a representative basis -\\
+1. Power law in $m_1$ and uniform in $m_2$,
+\begin{center}
+	$p(m_1,m_2) \propto m_1^{-\alpha}/(m_1-5M_\odot)$ with $\alpha = 2.35$\\
+\end{center}
+2. Uniform distribution in logarithms of both of the component masses.\\
+\\
+In both the cases, $m_1,m_2\geqslant 5M_\odot$ and $M\leqslant100M_\odot$. Taking the observations in O1 as a prior, the updated rate estimates are calculated as $R = 103^{+110}_{-63}$ Gpc$^{-3}$yr$^{-1}$ and $R = 32^{+33}_{-20}$ Gpc$^{-3}$yr$^{-1}$ for the two models respectively. Also, the new range of event rate which caps the two distributions is calculated to be $12 - 213$ Gpc$^{-3}$yr$^{-1}$ and is consistent with the previous range $9 - 240$ Gpc$^{-3}$yr$^{-1}$, calculated from O1.\\
+\\
+With the addition of GW170104 to the previous detections GW150914, LVT151012 and GW151226, the value of $\alpha$ in power law distribution (as discussed above) is updated from $2.5^{+1.5}_{-1.6}$ to $2.3^{+1.3}_{-1.4}$ (Section IV of Supplement Material\cite{1})
 
-% Create a new 1st level heading
-\section{Limits on Visible Space}
 
+\section*{\normalsize{\textit{Abadie et. al.\\}}\small{Predictions for the Rates of Compact Binary Coalescences Observable Ground-based Gravitational-wave Detectors}}
+Astrophysical predictions of CBC merger rates depend on a number of assumptions and unknown model parameters and are still ambiguious. This paper published in 2010, summarizes all the predictions made about CBC merger and detection rates from 2000 to October 1 2009. The most confident estimates are those of binary neutron stars because of the extrapolations of observed BNS systems in our Galaxy.\\
+\\
+CBC rates are assumed to be proportional to the stellar birth rates in spiral galaxies in the vicinity, which can be determined by their blue light luminosity L$_{B, \odot}$. Thus, the rates are expressed as coalescence rate per unit L$_{10}$ ($10^{10}$ times solar blue light luminosity, L$_{B, \odot})$. This method, however, does not track the star formation rate in the past very accurately as it does not consider the contributions of older populations from elliptical galaxies. Thus predictions made here are mainly dependent on the contribution from spiral galaxies and thus the rates are calculated in the units MWEG$^{-1}$ or L$_{10}^{-1}$. In future, when contribution from elliptical galaxies is properly included in the literature, overall rates will, more naturally, be qouted in Mpc$^{-3}$. Thus, rates dependent on spiral galaxies can be qouted in units Mpc$^{-3}$ Myr$^{-1}$ as follows,
+\begin{table}[h!]
+	\centering
+	\caption{Compact binary coalescence rates Mpc$^{-3}$ Myr$^{-1}$}
+	\label{tab:table1}
+	\begin{tabular}{ccccc}
+		\toprule
+		Source & $R_{low}$ & $R_{re}$ & $R_{high}$ & $R_{max}$\\
+		\midrule
+		NS-NS (Mpc$^{-3}$ Myr$^{-1}$) & 0.01 & 1 & 10 & 50\\
+		NS-BH (Mpc$^{-3}$ Myr$^{-1}$) & 6 $\times$ 10$^{-4}$ & 0.03 & 1 & \\
+		BH-BH (Mpc$^{-3}$ Myr$^{-1}$) & 1 $\times$ 10$^{-4}$ & 0.005 & 0.3 & \\
+		\bottomrule
+	\end{tabular}
+\end{table}
 
+\newpage
+\bibliographystyle{plain}
+\bibliography{info}
 \end{document}
