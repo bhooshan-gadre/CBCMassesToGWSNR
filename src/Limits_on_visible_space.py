@@ -1,7 +1,7 @@
 from function_SNR import *
 import matplotlib.pyplot as plt
 
-	
+
 # This function finds out the value of distance at which we get a specific value of SNR (5 or 60 in our case)
 # Gets input in the form (tolerance in SNR, value of SNR at which r is to be found out, array of r, array of SNR)
 def r_for_SNR(tol, val, x, y):
@@ -38,7 +38,6 @@ def calc_plot(Mat):
 	plt.title(Mat[8])
 	plt.axis([x_lL, x_L, 0., y_L])
 
-
 # Defining numpy array of r
 r = np.linspace(100, 5000, 1001)
 r *= Mpc
@@ -49,4 +48,3 @@ calc_plot(Mats[0])
 calc_plot(Mats[1])
 
 plt.show()
-
