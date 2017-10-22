@@ -2,13 +2,20 @@ import numpy as np
 from scipy import interpolate
 import time
 
+# Which run?
+RUN = input('Which run to generate data for? (S6, O1, O2, Design)\n: ')
+
+# Defining a dictionary for detector ASDs and LIGO runs
+detector = {0:'S6_L1', 1:'S6_H1', 2:'S6_V1', 3:'O1_L1', 4:'O1_H1', 5:'O2_L1', 6:'O2_H1', 7:'O2_V1', 8:'Design_L', 9:'Design_H', 10:'Design_V'}
+for_run = {'S6':[0, 1, 2], 'O1':[3, 4], 'O2':[5, 6, 7], 'Design':[8, 9, 10]}
 
 # To check the time taken for 2D interpolations
 start_time = time.time()
-# Reading the amplitude spectral density
-data = np.genfromtxt('/home/shreejit/asd.txt')
-# Interpolating the asd data (in log-log) to obtain an interpolated continuous function of frequency
-asd = interpolate.interp1d(np.log(data[:, 0]), np.log(data[:, 1]))
+# Reading the amplitude spectral densities of detectors into an array 'ASDdata'
+ASDdata = []
+for i in range(len(detector)):
+	ASDdata.append(np.genfromtxt('/home/shreejit/asd_' + detector[i] +'.txt'))
+ASDdata = np.array(ASDdata)
 
 # Reading the sky position dependent detector sensitivity data
 # Format of data: alpha, delta, F_plus, F_cross
@@ -29,16 +36,19 @@ Mpc = 3.08568025e22		# Megaparsec in 'm'
 df = 0.01
 freq = np.arange(9., 8000., df)
 
-# Calculating ASD values at respective elements of frequency array
-asd_at_freq = asd(np.log(freq))
-asd_at_freq = np.exp(asd_at_freq)
-
-# Now the frequency dependent integrand of the SNR calculation is calculated for the entire frequency range.
-# Only the values till ISCO frequency will be summed up from this array to get the integration.
-integrand = freq ** (-7. / 3.)
-integrand /= asd_at_freq ** 2.
-integrand *= df	
-
+# finding integrands for different detectors in the RUN
+integrand = np.zeros(len(detector), len(freq))
+for j in for_run[RUN]:
+	# Interpolating the asd data (in log-log) to obtain an interpolated continuous function of frequency
+	asd = interpolate.interp1d(np.log(ASDdata[j][:, 0]), np.log(ASDdata[j][:, 1]))
+	# Calculating ASD values at respective elements of frequency array
+	asd_at_freq = asd(np.log(freq))
+	asd_at_freq = np.exp(asd_at_freq)
+	# Now the frequency dependent integrand of the SNR calculation is calculated for the entire frequency range.
+	# Only the values till ISCO frequency will be summed up from this array to get the integration.
+	integrand[j] = freq ** (-7. / 3.)
+	integrand[j] /= asd_at_freq ** 2.
+	integrand[j] *= df	
 
 # Defining a simple function which takes arrays of masses of BHs (in kgs), 
 # array of distance (in m) and gives an output array of SNRs
@@ -66,7 +76,9 @@ def find_simple_SNR(M1, M2, dist):
 	# Making an SNR matrix of required dimension and then substituting values
 	SNR = np.zeros(len(M))
 	for ii in range(len(M)):
-		SNR[ii] = np.sqrt(4. * h_tilde[ii] * np.sum(integrand[:isco_index[ii]]))
+		for jj in for_run[RUN]:
+			SNR[ii] += (4. * h_tilde[ii] * np.sum(integrand[jj][:isco_index[ii]]))
+	SNR = np.sqrt(SNR)
 	return SNR
 	
 	
@@ -110,5 +122,7 @@ def find_SNR(M1, M2, dist, alpha, delta, iota):
 	# Making an SNR matrix of required dimension and then substituting values
 	SNR = np.zeros(len(M))
 	for ii in range(len(M)):
-		SNR[ii] = np.sqrt(4. * h_tilde[ii] * np.sum(integrand[:isco_index[ii]]))
+		for jj in for_run[RUN]:
+			SNR[ii] += (4. * h_tilde[ii] * np.sum(integrand[jj][:isco_index[ii]]))
+	SNR = np.sqrt(SNR)
 	return SNR
