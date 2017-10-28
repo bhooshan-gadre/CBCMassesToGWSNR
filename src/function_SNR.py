@@ -6,15 +6,18 @@ import time
 RUN = input('Which run to generate data for? (S6, O1, O2, Design)\n: ')
 
 # Defining a dictionary for detector ASDs and LIGO runs
+# These names will be used to pick ASD files
 detector = {0:'S6_L1', 1:'S6_H1', 2:'S6_V1', 3:'O1_L1', 4:'O1_H1', 5:'O2_L1', 6:'O2_H1', 7:'O2_V1', 8:'Design_L', 9:'Design_H', 10:'Design_V'}
+# Dictionary to tell which files to pick for a particular run
 for_run = {'S6':[0, 1, 2], 'O1':[3, 4], 'O2':[5, 6, 7], 'Design':[8, 9, 10]}
 
 # To check the time taken for 2D interpolations
 start_time = time.time()
 # Reading the amplitude spectral densities of detectors into an array 'ASDdata'
 ASDdata = []
-for i in range(len(detector)):
+for i in for_run[RUN]:
 	ASDdata.append(np.genfromtxt('/home/shreejit/asd_' + detector[i] +'.txt'))
+
 ASDdata = np.array(ASDdata)
 
 # Reading the sky position dependent detector sensitivity data
@@ -23,6 +26,8 @@ sky_lookup = np.genfromtxt('/home/shreejit/H1_allSky_antenna_patterns.dat')
 # 2D Interpolation of data to obtain F+ and Fx functions of right ascension and declination
 find_F_plus = interpolate.interp2d(sky_lookup[:,0], sky_lookup[:,1], sky_lookup[:,2])
 find_F_cross = interpolate.interp2d(sky_lookup[:,0], sky_lookup[:,1], sky_lookup[:,3])
+# clean memory
+del sky_lookup
 # Printing the time taken for reading and interpolation stuff
 print("Time taken to interpolate: %s seconds" % (time.time() - start_time))
 
@@ -37,7 +42,7 @@ df = 0.01
 freq = np.arange(9., 8000., df)
 
 # finding integrands for different detectors in the RUN
-integrand = np.zeros(len(detector), len(freq))
+integrand = np.zeros(len(detector)*len(freq)).reshape(len(detector), len(freq))
 for j in for_run[RUN]:
 	# Interpolating the asd data (in log-log) to obtain an interpolated continuous function of frequency
 	asd = interpolate.interp1d(np.log(ASDdata[j][:, 0]), np.log(ASDdata[j][:, 1]))
@@ -48,7 +53,9 @@ for j in for_run[RUN]:
 	# Only the values till ISCO frequency will be summed up from this array to get the integration.
 	integrand[j] = freq ** (-7. / 3.)
 	integrand[j] /= asd_at_freq ** 2.
-	integrand[j] *= df	
+	integrand[j] *= df
+#clean memory
+del ASDdata
 
 # Defining a simple function which takes arrays of masses of BHs (in kgs), 
 # array of distance (in m) and gives an output array of SNRs
@@ -77,7 +84,9 @@ def find_simple_SNR(M1, M2, dist):
 	SNR = np.zeros(len(M))
 	for ii in range(len(M)):
 		for jj in for_run[RUN]:
+			# Adding squares of SNRs in individual detectors
 			SNR[ii] += (4. * h_tilde[ii] * np.sum(integrand[jj][:isco_index[ii]]))
+	# And taking root of this quantity
 	SNR = np.sqrt(SNR)
 	return SNR
 	
@@ -123,6 +132,8 @@ def find_SNR(M1, M2, dist, alpha, delta, iota):
 	SNR = np.zeros(len(M))
 	for ii in range(len(M)):
 		for jj in for_run[RUN]:
+			# Adding squares of SNRs in individual detectors
 			SNR[ii] += (4. * h_tilde[ii] * np.sum(integrand[jj][:isco_index[ii]]))
+	# And taking root of this quantity
 	SNR = np.sqrt(SNR)
 	return SNR
