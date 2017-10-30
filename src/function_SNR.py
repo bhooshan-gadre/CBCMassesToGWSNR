@@ -16,7 +16,7 @@ start_time = time.time()
 # Reading the amplitude spectral densities of detectors into an array 'ASDdata'
 ASDdata = []
 for i in for_run[RUN]:
-	ASDdata.append(np.genfromtxt('/home/shreejit/asd_' + detector[i] +'.txt'))
+	ASDdata.append(np.genfromtxt('/home/shreejit/asd_%s.txt' %detector[i]))
 
 ASDdata = np.array(ASDdata)
 
