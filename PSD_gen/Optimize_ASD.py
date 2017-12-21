@@ -9,17 +9,18 @@ def opt(ASDdata):
     return asd_at_freq
 
 # Which run?
-# RUN = 'S6'
+# RUN = 'S5'
+RUN = 'S6'
 # RUN = 'O1'
-RUN = 'O2'
+# RUN = 'O2'
 # RUN = 'Design'
 
 # Defining a dictionary for detector ASDs and LIGO runs
 # These names will be used to pick ASD files
-detector = {0:'S6_L1', 1:'S6_H1', 2:'S6_V1', 3:'O1_L1', 4:'O1_H1', 5:'O2_L1', 6:'O2_H1', 7:'O2_V1', 8:'Design_L', 9:'Design_H', 10:'Design_V'}
+detector = {0:'S6_L1', 1:'S6_H1', 3:'O1_L1', 4:'O1_H1', 5:'O2_L1', 6:'O2_H1', 8:'Design_L', 9:'Design_H', 11:'S5_L1', 12:'S5_H1'}
 # Dictionary to tell which files to pick for a particular run
 # not considering Virgo detector in O2
-for_run = {'S6':[0, 1, 2], 'O1':[3, 4], 'O2':[5, 6], 'Design':[8, 9, 10]}
+for_run = {'S5':[11, 12], 'S6':[0, 1], 'O1':[3, 4], 'O2':[5, 6], 'Design':[8, 9]}
 
 # Necessary freq range
 df = 0.125
@@ -44,7 +45,7 @@ if RUN == 'Design':
     # numpy array of freq and ASD
     ASD = np.array(ASD).transpose()
     # Saving the new file
-    f = open('/home/shreejit/opt/asd_Design.txt', 'w')
+    f = open('/home/shreejit/ASD/asd_Design.txt', 'w')
     np.savetxt(f, ASD, delimiter=',', newline='\n')
     f.close()
 
@@ -52,6 +53,6 @@ else:
     for i in for_run[RUN]:
         ASDdata = np.genfromtxt('/home/shreejit/asd_%s.txt' %detector[i], delimiter=',')
         opt_asd = np.array([freq, opt(ASDdata)]).transpose()
-        f2 = open('/home/shreejit/opt/asd_%s.txt' %detector[i], 'w')
+        f2 = open('/home/shreejit/ASD/asd_%s.txt' %detector[i], 'w')
         np.savetxt(f2, opt_asd, delimiter=',', newline='\n')
         f2.close()
