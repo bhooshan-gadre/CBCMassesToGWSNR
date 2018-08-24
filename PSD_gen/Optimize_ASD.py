@@ -30,7 +30,7 @@ freq = np.arange(20., 1500.+df, df)
 
 if RUN == 'Design':
     # Read the PSD file (heavy)
-    dat = np.genfromtxt('/home/shreejit/Design_PSD.txt')
+    dat = np.genfromtxt('./../Data/Design_PSD.txt')
     # Convert to ASD file (still heavy)
     dat[:, 1] = np.sqrt(dat[:, 1])
     # Picking out indices of concerned freq range
@@ -45,14 +45,14 @@ if RUN == 'Design':
     # numpy array of freq and ASD
     ASD = np.array(ASD).transpose()
     # Saving the new file
-    f = open('/home/shreejit/ASD/asd_Design.txt', 'w')
+    f = open('./../Data/asd_Design.txt', 'w')
     np.savetxt(f, ASD, delimiter=',', newline='\n')
     f.close()
 
 else:
     for i in for_run[RUN]:
-        ASDdata = np.genfromtxt('/home/shreejit/asd_%s.txt' %detector[i], delimiter=',')
+        ASDdata = np.genfromtxt('./../Data/asd_%s.txt' %detector[i], delimiter=',')
         opt_asd = np.array([freq, opt(ASDdata)]).transpose()
-        f2 = open('/home/shreejit/ASD/asd_%s.txt' %detector[i], 'w')
+        f2 = open('./../Data/asd_%s.txt' %detector[i], 'w')
         np.savetxt(f2, opt_asd, delimiter=',', newline='\n')
         f2.close()

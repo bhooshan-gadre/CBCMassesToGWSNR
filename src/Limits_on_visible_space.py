@@ -10,14 +10,8 @@ def r_for_SNR(tol, val, x, y):
 	return x[np.where(yy<(val+tol))]
 	
 # Main function which finds SNR, cutoff on distance and plots the graphs
-# Takes input as a matrix containing info: [SNRcutoff, M_BH, low_lim_x_axis, uppr_lim_x_axis, uppr_lim_y_axis, tolerance, offset for annotation in x, in y, annotation]
-def calc_plot(Mat):
-	cut = Mat[0]
-	ML = Mat[1]
-	x_lL = Mat[2]
-	x_L = Mat[3]
-	y_L = Mat[4]
-	tolrnc = Mat[5]
+# Takes input : (SNRcutoff, M_BH, low_lim_x_axis, uppr_lim_x_axis, uppr_lim_y_axis, tolerance, offset for annotation in x, in y, annotation)
+def calc_plot(cut, ML, x_l, x_u, y_u, tolrnc, off_x, off_y, annot):
 	M1 = np.ones(len(r)) * ML * Msun
 	M2 = np.ones(len(r)) * ML * Msun
 	SNR  = find_simple_SNR(M1, M2, r)
@@ -26,25 +20,27 @@ def calc_plot(Mat):
 
 	# Plotting
 	fig = plt.figure()
+	# For the plot SNR vs. r
 	sb = fig.add_subplot(111)
+	# For the limiting point
 	sb2 = fig.add_subplot(111)
-
+	# Plot SNR vs. r
 	sb.plot(r/Mpc, SNR, '-')
+	# Plot the limiting point
 	sb2.plot([rL], [cut], 'o')
-	sb2.annotate('  (%1.1f Mpc,  %1.1f)' %(rL, cut), (rL + Mat[6], cut + Mat[7]))
+	sb2.annotate('  (%1.1f Mpc,  %1.1f)' %(rL, cut), (rL + off_x, cut + off_y))
 	sb.grid(True)
 	plt.xlabel('Distance (Mpc)')
 	plt.ylabel('SNR')
-	plt.title(Mat[8])
-	plt.axis([x_lL, x_L, 0., y_L])
+	plt.title(annot)
+	plt.axis([x_l, x_u, 0., y_u])
 
 # Defining numpy array of r
 r = np.linspace(100, 5000, 1001)
 r *= Mpc
 
-Mats = [[60., 50., 0., 3000., 300., 0.2, 50., 4., 'Lower Cutoff'], [5., 5., 0., 5000., 100., 0.005, -700., 4., 'Higher Cutoff']]
-
-calc_plot(Mats[0])
-calc_plot(Mats[1])
+# Input : (SNRcutoff, M_BH, low_lim_x_axis, uppr_lim_x_axis, uppr_lim_y_axis, tolerance, offset for annotation in x, in y, annotation)
+calc_plot(60., 50., 0., 3000., 300., 0.2, 50., 4., 'Lower Cutoff')
+calc_plot(5., 5., 0., 5000., 100., 0.005, -700., 4., 'Higher Cutoff')
 
 plt.show()

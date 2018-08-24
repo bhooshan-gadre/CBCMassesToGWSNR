@@ -35,7 +35,7 @@ import readligo as rl
 
 # In[22]:
 # Read the event properties from a local json file
-fnjson = "BBH_events_v3.json"
+fnjson = "./../Data/BBH_events_v3.json"
 try:
     events = json.load(open(fnjson,"r"))
 except IOError:
@@ -131,8 +131,8 @@ if make_plots:
 plt.show()
 
 # Save the PSD File
-File_H1 = open(('asd_%s_H1.txt' %Obs), 'w')
-File_L1 = open(('asd_%s_L1.txt' %Obs), 'w')
+File_H1 = open(('./../Data/asd_%s_H1.txt' %Obs), 'w')
+File_L1 = open(('./../Data/asd_%s_L1.txt' %Obs), 'w')
 np.savetxt(File_H1, np.array([freqs, np.sqrt(Pxx_H1)]).transpose(), delimiter=',', newline='\n')
 np.savetxt(File_L1, np.array([freqs, np.sqrt(Pxx_L1)]).transpose(), delimiter=',', newline='\n')
 File_H1.close()

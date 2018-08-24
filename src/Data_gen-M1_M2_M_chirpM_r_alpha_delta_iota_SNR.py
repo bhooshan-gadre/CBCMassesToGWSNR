@@ -8,7 +8,7 @@ class Distri:
         self.data = np.zeros(Iter*Md*9).reshape(Iter*Md, 9)     # array in which all the data will be stored
         self.r = r              # distance array such that vol is discretized equally
         self.filenm = filenm    # distribution name used to read file
-        self.rf = open(('Data-for-%s-distri_M1_M2_M_chirpM_r_alpha_delta_iota_SNR.csv' %filenm), 'w')   # Read corresponding file
+        self.rf = open(('./../Data/Data-for-%s-distri_M1_M2_M_chirpM_r_alpha_delta_iota_SNR.csv' %filenm), 'w')   # Read corresponding file
     # Generating random sky position and orientation (arrays)
     def a_d_i(self):
         alpha = np.random.uniform(0., 2.*np.pi, self.Md)
@@ -52,10 +52,13 @@ class Distri:
         for count in range(self.Iter):
             if count==0: iter_time = time.time()
             # generating component masses uniform in log
-            m1 = np.random.uniform(np.log(5. * Msun), np.log(50. * Msun), self.Md)
+            m1 = np.random.uniform(np.log(5. * Msun), np.log(95. * Msun), 10*self.Md)
             m1 = np.exp(m1)
-            m2 = np.random.uniform(np.log(5. * Msun), np.log((100. * Msun - m1)), self.Md)
+            m2 = np.random.uniform(np.log(5. * Msun), np.log(95. * Msun), 10*self.Md)
             m2 = np.exp(m2)
+            i_accpt = np.where((m1+m2) < 100.*Msun)
+            m1 = m1[i_accpt][:self.Md]
+            m2 = m2[i_accpt][:self.Md]
             alpha, delta, iota = self.a_d_i()
             SNR = find_SNR(m1, m2, self.r, alpha, delta, iota)
             M, chirpM = self.M_chirpM(m1, m2)
@@ -65,34 +68,30 @@ class Distri:
         self.data = self.data[self.data[:,3].argsort()]
     # Calculating data for power law distribution
     def pow_law(self):
-        # To ensure uniform distribution of m2 upto m1 (20 values of m2 for each m1)
-        # We sub-iterate m2 kk times for each m1
-        kk = 20
-        for count in range(Iter/kk):
+        for count in range(self.Iter):
             if count==0: iter_time = time.time()
             # Power to which 1st component mass is distributed, P(m1) = m1^-ALPHA
             ALPHA = 2.3
             A = 5.**(1.-ALPHA) - 95.**(1.-ALPHA)
             C = 2. + 95.**(1.-ALPHA) / A
-            m1 = np.random.uniform(1., 2., Md)
+            # Deliberately sampling 10 times higher number of samples
+            m1 = np.random.uniform(1., 2., 10*self.Md)
             m1 = (A * (C - m1)) ** (1./(1.-ALPHA))
             m1 *= Msun
-            m_uppr = np.zeros(Md)     # We create an array m_uppr to choose an upper limit on choice of m2
-            for i in range(Md):       # This business is done to ensure that the conditions m1>m2 & m1+m2<=100 Msun are obeyed
-                if m1[i] < 50.*Msun: m_uppr[i] = m1[i]
-                else: m_uppr[i] = 100.*Msun - m1[i]
-            # We sub-iterate kk times for uniform distribution of m2 upto m_uppr, for each m1
-            for j in range(kk):
-                m2 = np.random.uniform(5.*Msun, m_uppr, Md)
-                alpha, delta, iota = self.a_d_i()
-                SNR = find_SNR(m1, m2, self.r, alpha, delta, iota)
-                M, chirpM = self.M_chirpM(m1, m2)
-                self.data[(count*kk+j)*self.Md:(count*kk+(j+1))*self.Md] = np.array([m1, m2, M, chirpM, self.r, alpha, delta, iota, SNR]).transpose()
-                if count==0: iter_time2 = time.time()
-                print "Remaining time: %s Min" %((self.Iter - count) * (iter_time2 - iter_time) / 60.)
+            m2 = np.random.uniform(5.*Msun, m1, 10*self.Md)
+            # Indices of samples whose total mass is lower than 100 Msun
+            i_accpt = np.where((m1+m2) < 100.*Msun)
+            # Take only "self.Md" combinations out of the acceptable ones
+            m1 = m1[i_accpt][:self.Md]
+            m2 = m2[i_accpt][:self.Md]
+            alpha, delta, iota = self.a_d_i()
+            SNR = find_SNR(m1, m2, self.r, alpha, delta, iota)
+            M, chirpM = self.M_chirpM(m1, m2)
+            self.data[count*self.Md:(count+1)*self.Md] = np.array([m1, m2, M, chirpM, self.r, alpha, delta, iota, SNR]).transpose()
+            if count==0: iter_time2 = time.time()
+            print "Remaining time: %s Min" %((self.Iter - count) * (iter_time2 - iter_time) / 60.)
         # We sort the data such that the rows are sorted with descending value of chirp masses of binaries
         self.data = self.data[self.data[:,3].argsort()]
-        print self.data
     # Write the data into resp file
     def write(self):
         # Top row in the data file written

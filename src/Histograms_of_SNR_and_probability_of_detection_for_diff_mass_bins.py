@@ -44,7 +44,7 @@ mtyp = input('Which mass to plot against? (Total Mass / Chirp Mass)\n: ')
 # Dictionary to identify the input mtyp
 Dict = {'Total Mass': 0, 'Chirp Mass': 1}
 # Reading resp data file into an array
-dat = np.genfromtxt('Data-for-%s-distri_M1_M2_M_chirpM_r_alpha_delta_iota_SNR.csv' %inp_distri, delimiter=',')
+dat = np.genfromtxt('./../Data/Data-for-%s-distri_M1_M2_M_chirpM_r_alpha_delta_iota_SNR.csv' %inp_distri, delimiter=',')
 # Weighing factor ALPHA is 2.3 for Uniform distribution and zero for others
 ALPHA = 0.
 if inp_distri == 'Uniform': ALPHA = 2.3
@@ -86,17 +86,23 @@ plt.plot(np.arange(ml, mu, (mu - ml)/5.), frac13, 'go-',  label='SNR>13')
 plt.plot(np.arange(ml, mu, (mu - ml)/5.), frac23, 'mo-', label='SNR>23')
 
 # Observations made so far. First array of Total Masses of binaries and second that of Chirp Masses.
-Obs = np.array([[65., 36., 21.7, 50.6], [30., 15.1, 8.9, 21.1]])
+Obs = np.array([[65., 36., 21.7, 50.6, 19., 55.8], [30., 15.1, 8.9, 21.1, 7.92, 24.16]])
 # # Observed data
 plt.axvline(x=Obs[Dict[mtyp], 0], ymin=0., ymax = 1., linewidth=2, color='m', alpha=0.5)  #GW150914
 plt.axvline(x=Obs[Dict[mtyp], 1], ymin=0., ymax = 1., linewidth=2, color='c', alpha=0.5)  #LVT151012
 plt.axvline(x=Obs[Dict[mtyp], 2], ymin=0., ymax = 1., linewidth=2, color='g', alpha=0.5)  #GW151226
 plt.axvline(x=Obs[Dict[mtyp], 3], ymin=0., ymax = 1., linewidth=2, color='g', alpha=0.5)  #GW170104
+plt.axvline(x=Obs[Dict[mtyp], 4], ymin=0., ymax = 1., linewidth=2, color='g', alpha=0.5)  #GW170608
+plt.axvline(x=Obs[Dict[mtyp], 5], ymin=0., ymax = 1., linewidth=2, color='g', alpha=0.5)  #GW170814
+
+
 # Annotations
 plt.annotate(' GW150914\n (SNR 24) ', (Obs[Dict[mtyp], 0]+0.4, 0.035), fontsize=12, fontweight='bold', color='m')
-plt.annotate(' LVT151012\n (SNR 9.7) ', (Obs[Dict[mtyp], 0]+0.4, 0.035), fontsize=12, fontweight='bold', color='c')
-plt.annotate(' GW151226\n (SNR 13) ', (Obs[Dict[mtyp], 0]+0.4, 0.035), fontsize=12, fontweight='bold', color='g')
-plt.annotate(' GW170104\n (SNR 13) ', (Obs[Dict[mtyp], 0]+0.4, 0.035), fontsize=12, fontweight='bold', color='g')
+plt.annotate(' LVT151012\n (SNR 9.7) ', (Obs[Dict[mtyp], 1]+0.4, 0.035), fontsize=12, fontweight='bold', color='c')
+plt.annotate(' GW151226\n (SNR 13) ', (Obs[Dict[mtyp], 2]+0.4, 0.035), fontsize=12, fontweight='bold', color='g')
+plt.annotate(' GW170104\n (SNR 13) ', (Obs[Dict[mtyp], 3]+0.4, 0.035), fontsize=12, fontweight='bold', color='g')
+plt.annotate(' GW170608\n (SNR 13) ', (Obs[Dict[mtyp], 4]+0.4, 0.035), fontsize=12, fontweight='bold', color='g')
+plt.annotate(' GW170814\n (SNR 18) ', (Obs[Dict[mtyp], 5]+0.4, 0.035), fontsize=12, fontweight='bold', color='g')
 
 plt.ylabel('Probability of Detection (SNR>9, SNR>13 amd SNR>23)')
 

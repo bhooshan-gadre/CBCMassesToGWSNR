@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 # TO read and plot ASD for a specific run
 def ASD(Run, colr, Alpha):
     # Read ASD data
-    dat = np.genfromtxt('/home/shreejit/asd_%s_L1.txt' %Run, delimiter=',')
+    dat = np.genfromtxt('./../Data/asd_%s_L1.txt' %Run, delimiter=',')
     # Plot ASD
     plt.loglog(dat[:, 0], dat[:, 1], colr, alpha=Alpha, label=Run)
 

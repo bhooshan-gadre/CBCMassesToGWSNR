@@ -13,20 +13,20 @@ for_run = {'S6':[0, 1, 2], 'O1':[3, 4], 'O2':[5, 6, 7], 'Design':[8, 9, 10]}
 
 # To check the time taken for 2D interpolations
 start_time = time.time()
-# Reading the amplitude spectral densities of detectors into an array 'ASDdata'
+# Reading the amplitude spectral densities of all detectors into an array 'ASDdata'
 ASDdata = []
 for i in for_run[RUN]:
-	ASDdata.append(np.genfromtxt('/home/shreejit/asd_%s.txt' %detector[i]))
+	ASDdata.append(np.genfromtxt('./../Data/asd_%s.txt' %detector[i]))
 
 ASDdata = np.array(ASDdata)
 
 # Reading the sky position dependent detector sensitivity data
 # Format of data: alpha, delta, F_plus, F_cross
-sky_lookup = np.genfromtxt('/home/shreejit/H1_allSky_antenna_patterns.dat')
+sky_lookup = np.genfromtxt('./../Data/H1_allSky_antenna_patterns.dat')
 # 2D Interpolation of data to obtain F+ and Fx functions of right ascension and declination
 find_F_plus = interpolate.interp2d(sky_lookup[:,0], sky_lookup[:,1], sky_lookup[:,2])
 find_F_cross = interpolate.interp2d(sky_lookup[:,0], sky_lookup[:,1], sky_lookup[:,3])
-# clean memory
+#clean
 del sky_lookup
 # Printing the time taken for reading and interpolation stuff
 print("Time taken to interpolate: %s seconds" % (time.time() - start_time))
@@ -42,7 +42,7 @@ df = 0.01
 freq = np.arange(9., 8000., df)
 
 # finding integrands for different detectors in the RUN
-integrand = np.zeros(len(detector)*len(freq)).reshape(len(detector), len(freq))
+integrand = np.zeros([len(detector), len(freq)])
 for j in for_run[RUN]:
 	# Interpolating the asd data (in log-log) to obtain an interpolated continuous function of frequency
 	asd = interpolate.interp1d(np.log(ASDdata[j][:, 0]), np.log(ASDdata[j][:, 1]))
@@ -54,7 +54,7 @@ for j in for_run[RUN]:
 	integrand[j] = freq ** (-7. / 3.)
 	integrand[j] /= asd_at_freq ** 2.
 	integrand[j] *= df
-#clean memory
+#clean
 del ASDdata
 
 # Defining a simple function which takes arrays of masses of BHs (in kgs), 
@@ -89,9 +89,9 @@ def find_simple_SNR(M1, M2, dist):
 	# And taking root of this quantity
 	SNR = np.sqrt(SNR)
 	return SNR
-	
-	
-# Defining a more precise function which takes array of masses of BHs (in kgs), array of distance (in m), 
+
+
+# Defining a more accurate function which takes array of masses of BHs (in kgs), array of distance (in m), 
 # the right ascension angle-alpha, declination angle-delta and angle between line of sight and 
 # angular momentum vector of binary-iota, to give an array of SNRs
 def find_SNR(M1, M2, dist, alpha, delta, iota):
@@ -128,12 +128,13 @@ def find_SNR(M1, M2, dist, alpha, delta, iota):
 	# the integrand values are to be summed till this index to get integration value
 	isco_index = ((f_isco - freq[0]) / df).astype(int)
 
-	# Making an SNR matrix of required dimension and then substituting values
+	# Making an SNR matrix of dimension equal to the mass array and then substituting values
 	SNR = np.zeros(len(M))
 	for ii in range(len(M)):
+		# Adding the squares of SNRs in all the detectors
 		for jj in for_run[RUN]:
 			# Adding squares of SNRs in individual detectors
 			SNR[ii] += (4. * h_tilde[ii] * np.sum(integrand[jj][:isco_index[ii]]))
-	# And taking root of this quantity
+	# And taking root to get the final SNR
 	SNR = np.sqrt(SNR)
 	return SNR
