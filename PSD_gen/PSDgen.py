@@ -1,18 +1,20 @@
-Obs = 'S5'
-eventname = 'S5_data'
+# run = 'S5'
+# eventname = 'S5_data'
 
-# Obs = 'S6'
+# run = 'S6'
 # eventname = 'S6_data'
 
-# Obs = 'O1'
+# run = 'O1'
+# eventname = 'O1_data'
 # eventname = 'GW150914' 
 #eventname = 'GW151226' 
 #eventname = 'LVT151012'
 
-# Obs = 'O2'
-# eventname = 'GW170104'
+run = 'O2'
+# eventname = 'O2_data'
+eventname = 'GW170104'
 
-# Obs = 'Design'
+# run = 'Design'
 
 
 # want plots?
@@ -35,7 +37,8 @@ import readligo as rl
 
 # In[22]:
 # Read the event properties from a local json file
-fnjson = "./../Data/BBH_events_v3.json"
+file_path = "./../Data/"
+fnjson = file_path + "BBH_events_v3.json"
 try:
     events = json.load(open(fnjson,"r"))
 except IOError:
@@ -69,8 +72,8 @@ print(event)
 #----------------------------------------------------------------
 try:
     # read in data from H1 and L1, if available:
-    strain_H1, time_H1, chan_dict_H1 = rl.loaddata(fn_H1, 'H1')
-    strain_L1, time_L1, chan_dict_L1 = rl.loaddata(fn_L1, 'L1')
+    strain_H1, time_H1, chan_dict_H1 = rl.loaddata(file_path + fn_H1, 'H1')
+    strain_L1, time_L1, chan_dict_L1 = rl.loaddata(file_path + fn_L1, 'L1')
 except:
     print("Cannot find data files!")
     print("You can download them from https://losc.ligo.org/s/events/"+eventname)
@@ -131,8 +134,8 @@ if make_plots:
 plt.show()
 
 # Save the PSD File
-File_H1 = open(('./../Data/asd_%s_H1.txt' %Obs), 'w')
-File_L1 = open(('./../Data/asd_%s_L1.txt' %Obs), 'w')
+File_H1 = open((file_path + "asd_%s_H1.txt" %run), 'w')
+File_L1 = open((file_path + "asd_%s_L1.txt" %run), 'w')
 np.savetxt(File_H1, np.array([freqs, np.sqrt(Pxx_H1)]).transpose(), delimiter=',', newline='\n')
 np.savetxt(File_L1, np.array([freqs, np.sqrt(Pxx_L1)]).transpose(), delimiter=',', newline='\n')
 File_H1.close()

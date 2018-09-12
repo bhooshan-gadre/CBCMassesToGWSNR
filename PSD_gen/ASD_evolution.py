@@ -14,10 +14,18 @@ for run, color, A in zip(['S5', 'S6', 'O1', 'O2', 'Design'], ['g', 'g', 'b', 'b'
     ASD(run, color, A)
 
 # Detailing of graph
+fnt = 17
+f_min = 10.
+f_max = 2048.
+plt.axis([f_min, f_max, 1e-24, 1e-19])
 plt.grid('on')
-plt.xlabel('Frequency (Hz)')
-plt.ylabel('ASD (strain/rtHz)')
-plt.title('Evolution of ASD curves')
-plt.legend(title='Runs', loc='upper right')
+plt.xticks(fontsize=fnt)
+plt.yticks(fontsize=fnt)
+plt.xlabel('Frequency (Hz)', fontsize=fnt)
+plt.ylabel('ASD (strain/rtHz)', fontsize=fnt)
+plt.title('Evolution of ASD curve', fontsize=fnt)
+legend = plt.legend(title='Runs', fontsize=fnt, loc='upper right')
+legend.get_title().set_fontsize(fnt) #legend 'Title' fontsize
+plt.setp(plt.gca().get_legend().get_texts(), fontsize='15') #legend 'list' fontsize
 
 plt.show()
