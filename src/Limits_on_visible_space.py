@@ -1,46 +1,68 @@
 from function_SNR import *
 import matplotlib.pyplot as plt
 
-
-# This function finds out the value of distance at which we get a specific value of SNR (5 or 60 in our case)
-# Gets input in the form (tolerance in SNR, value of SNR at which r is to be found out, array of r, array of SNR)
-def r_for_SNR(tol, val, x, y):
-	yy = y[np.where(y>(val-tol))]
-	# print np.where(yy<(val+tol))
-	return x[np.where(yy<(val+tol))]
-	
-# Main function which finds SNR, cutoff on distance and plots the graphs
-# Takes input : (SNRcutoff, M_BH, low_lim_x_axis, uppr_lim_x_axis, uppr_lim_y_axis, tolerance, offset for annotation in x, in y, annotation)
-def calc_plot(cut, ML, x_l, x_u, y_u, tolrnc, off_x, off_y, annot):
-	M1 = np.ones(len(r)) * ML * Msun
-	M2 = np.ones(len(r)) * ML * Msun
-	SNR  = find_simple_SNR(M1, M2, r)
-	rL = r_for_SNR(tolrnc, cut, r, SNR)/Mpc
-	print '(', rL, ', ', cut, ')'
-
-	# Plotting
-	fig = plt.figure()
-	# For the plot SNR vs. r
-	sb = fig.add_subplot(111)
-	# For the limiting point
-	sb2 = fig.add_subplot(111)
-	# Plot SNR vs. r
-	sb.plot(r/Mpc, SNR, '-')
-	# Plot the limiting point
-	sb2.plot([rL], [cut], 'o')
-	sb2.annotate('  (%1.1f Mpc,  %1.1f)' %(rL, cut), (rL + off_x, cut + off_y))
-	sb.grid(True)
-	plt.xlabel('Distance (Mpc)')
-	plt.ylabel('SNR')
-	plt.title(annot)
-	plt.axis([x_l, x_u, 0., y_u])
-
 # Defining numpy array of r
-r = np.linspace(100, 5000, 1001)
+r = np.arange(1., 5000., 0.125)
 r *= Mpc
+# limiting masses
+mass_lim = {'Lower Cutoff': 50., 'Upper Cutoff': 5.}
+# SNR cutoffs
+cut = {'Lower Cutoff': 60., 'Upper Cutoff': 5.}
+# dict of SNRs which will contain SNR dicts against cutoffs. These SNR dicts in turn contain SNR arrays corresponding to diff RUNs
+SNRs = {'Lower Cutoff': {}, 'Upper Cutoff': {}}
+# limits on space
+r_extreme = {'Lower Cutoff': {}, 'Upper Cutoff': {}}
 
-# Input : (SNRcutoff, M_BH, low_lim_x_axis, uppr_lim_x_axis, uppr_lim_y_axis, tolerance, offset for annotation in x, in y, annotation)
-calc_plot(60., 50., 0., 3000., 300., 0.2, 50., 4., 'Lower Cutoff')
-calc_plot(5., 5., 0., 5000., 100., 0.005, -700., 4., 'Higher Cutoff')
+# x_l = 0.
+# x_u = 3000.
+# y_u = 300.
+# tolrnc = 0.2
+off_x = 50.
+off_y = 4.
+# RUN = 'S6'
 
+for cutoff in cut.keys():
+	# creating injection arrays with cutoff mass pairs
+	M1 = np.ones(len(r)) * mass_lim[cutoff] * Msun
+	M2 = np.ones(len(r)) * mass_lim[cutoff] * Msun
+	# finding SNRs for respective cutoffs for diff RUNs
+	SNRs[cutoff]  = find_simple_SNR(M1, M2, r)
+	# find extremity in space corresponding to the SNR cutoff
+	for RUN in SNRs[cutoff].keys():
+		r_extreme[cutoff][RUN] = r[np.where(min((SNRs[cutoff][RUN] - cut[cutoff])**2.) == ((SNRs[cutoff][RUN] - cut[cutoff])**2.))]
+
+print r_extreme
+#########################################
+# 				Output:
+
+# {'Lower Cutoff': 
+# {'Design': array([ 1056.]),
+#   'O1': array([ 179.]),
+#   'O2': array([ 267.875]),
+#   'S6': array([ 1.625])},
+
+# 'Upper Cutoff': 
+# {'Design': array([ 3452.125]),
+#   'O1': array([ 964.875]),
+#   'O2': array([ 1224.375]),
+#   'S6': array([ 169.])}}
+#########################################
+
+# Plotting
+fig = plt.figure(figsize=(15,10))
+# for all RUNs
+for RUN, colr in zip(r_extreme["Lower Cutoff"].keys(), ["g", "r", "b", "m"]):
+	for cutoff in cut.keys():
+		# SNR vs r curves
+		plt.plot(r/Mpc, SNRs[cutoff][RUN], colr+"-", label=RUN + ": " + cutoff)
+	plt.fill_between(r/Mpc, 0, 100., where=(r/Mpc<r_extreme["Upper Cutoff"][RUN]/Mpc) & (r/Mpc>r_extreme["Lower Cutoff"][RUN]/Mpc), edgecolor=colr, facecolor=colr, alpha=0.7, label=RUN)
+plt.xlim(0., 4000.)
+plt.ylim(0., 80.)
+# plt.xscale("log")
+# plt.yscale("log")
+plt.grid(True)
+plt.xlabel('Distance (Mpc)')
+plt.ylabel('SNR')
+plt.title("Limits on observable space for different observational runs of LIGO")
+plt.legend(loc="upper right")
 plt.show()
