@@ -2,6 +2,9 @@ import numpy as np
 from scipy import interpolate
 import time
 
+from pycbc.waveform import get_fd_waveform
+import pycbc.filter.matchedfilter as mf
+
 # Which run?
 # RUN = input('Which run to generate data for? (S6, O1, O2, Design)\n: ')
 
@@ -44,6 +47,7 @@ c = 2.99792458e8		# Speed of light in 'm/s'
 Mpc = 3.08568025e22		# Megaparsec in 'm'
 # Array of frequencies
 df = 0.01
+r_extreme = {'Lower Cutoff': {'Design': 1056.*Mpc, 'O1': 179.*Mpc, 'O2': 267.875*Mpc, 'S6': 1.625*Mpc}, 'Upper Cutoff': {'Design': 3452.125*Mpc, 'O1': 964.875*Mpc, 'O2': 1224.375*Mpc, 'S6': 169.*Mpc}}
 
 ############# Change f_low #############
 freq = np.arange(20., 1500., df)
@@ -79,12 +83,6 @@ def find_simple_SNR(M1, M2, dist):
 	chirpM = M * (n ** (3./5.))
 	Const = G * chirpM / (c ** 3.)
 
-	# Amplitude calculation
-	h_tilde = np.sqrt(5. / np.pi / 24.) * (Const * c)
-	h_tilde /= dist	
-	h_tilde *= (Const * np.pi) ** (-1./6.)
-	h_tilde **= 2.
-
 	# Calculation of ISCO frequency (array)
 	f_isco = c ** 3. / (6. ** 1.5 * np.pi * G * M)
 	# Now, finding the index of each ISCO freq in freq array
@@ -94,11 +92,16 @@ def find_simple_SNR(M1, M2, dist):
 	# Making an SNR dictionary for SNR arrays corresponding to diff RUNs
 	SNRs_for_RUN = {}
 	for RUN in for_run.keys():
+		# Amplitude calculation
+		h_tilde_sq = np.sqrt(5. / np.pi / 24.) * (Const * c)
+		h_tilde_sq /= dist[RUN]
+		h_tilde_sq *= (Const * np.pi) ** (-1./6.)
+		h_tilde_sq **= 2.
 		# Initialization of SNR array for corresponding RUN
 		SNRs_for_RUN[RUN] = np.zeros(len(M))
 		for ii in range(len(M)):	# for each CBC injection
 			# Adding squares of SNRs in individual detectors
-			SNRs_for_RUN[RUN][ii] = (4. * h_tilde[ii] * np.sum(integrand[for_run[RUN], isco_index[ii]]))
+			SNRs_for_RUN[RUN][ii] = (4. * h_tilde_sq[ii] * np.sum(integrand[for_run[RUN], isco_index[ii]]))
 		# And taking root to get values of SNR
 		SNRs_for_RUN[RUN] = np.sqrt(SNRs_for_RUN[RUN])
 	return SNRs_for_RUN
@@ -119,18 +122,6 @@ def find_SNR(M1, M2, dist, alpha, delta, iota):
 	# Creating matrices of required dimensions and substituting the values using interpolation functions for F+ and Fx
 	F_plus = np.array([float(find_F_plus(ALPHA, DELTA)) for ALPHA, DELTA in zip(alpha, delta)])
 	F_cross = np.array([float(find_F_cross(ALPHA, DELTA)) for ALPHA, DELTA in zip(alpha, delta)])
-	
-	# Calculating the effective distance to the source
-	D_eff = (F_plus * (1. + (np.cos(iota)) ** 2.) / 2.) ** 2.
-	D_eff += (F_cross * np.cos(iota)) ** 2.
-	D_eff **= -0.5
-	D_eff *= dist
-
-	#Calculation of amplitude
-	h_tilde = np.sqrt(5. / np.pi / 24.) * (Const * c)
-	h_tilde /= D_eff
-	h_tilde *= (Const * np.pi) ** (-1./6.)
-	h_tilde **= 2.
 
 	# Calculation of ISCO frequency (array)
 	f_isco = c ** 3. / (6. ** 1.5 * np.pi * G * M)
@@ -141,11 +132,31 @@ def find_SNR(M1, M2, dist, alpha, delta, iota):
 	# Making an SNR dictionary for SNR arrays corresponding to diff RUNs
 	SNRs_for_RUN = {}
 	for RUN in for_run.keys():
+		# Calculating the effective distance to the source
+		D_eff = (F_plus * (1. + (np.cos(iota)) ** 2.) / 2.) ** 2.
+		D_eff += (F_cross * np.cos(iota)) ** 2.
+		D_eff **= -0.5
+		D_eff *= dist[RUN]
+		#Calculation of amplitude
+		h_tilde_sq = np.sqrt(5. / np.pi / 24.) * (Const * c)
+		h_tilde_sq /= D_eff
+		h_tilde_sq *= (Const * np.pi) ** (-1./6.)
+		h_tilde_sq **= 2.
 		# Initialization of SNR array for corresponding RUN
 		SNRs_for_RUN[RUN] = np.zeros(len(M))
 		for ii in range(len(M)):	# for each CBC injection
 			# Adding squares of SNRs in individual detectors
-			SNRs_for_RUN[RUN][ii] = (4. * h_tilde[ii] * np.sum(integrand[for_run[RUN], isco_index[ii]]))
+			SNRs_for_RUN[RUN][ii] = (4. * h_tilde_sq[ii] * np.sum(integrand[for_run[RUN], isco_index[ii]]))
 		# And taking root to get values of SNR
 		SNRs_for_RUN[RUN] = np.sqrt(SNRs_for_RUN[RUN])
 	return SNRs_for_RUN
+
+# Defining a PyCBC based function which takes array of masses of BHs (in kgs), array of distance (in m), 
+# the right ascension angle-alpha, declination angle-delta and angle between line of sight and 
+# angular momentum vector of binary-iota, to give an array of SNRs
+def find_pycbc_SNR(M1, M2, dist, alpha, delta, iota):
+	M1 = M1 / Msun
+	M2 = M2 / Msun
+	dist = dist / Mpc
+	sptilde, sctilde = get_fd_waveform(approximant="TaylorF2", mass1=M1, mass2=M2, distance=dist, inclination=iota, delta_f=df, f_lower=freq[0])
+	mf.sigmasq(htilde, psd=None, low_frequency_cutoff=None, high_frequency_cutoff=None)
