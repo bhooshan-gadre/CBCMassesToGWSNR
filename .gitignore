@@ -1,0 +1,10 @@
+# Ignore everything in this directory
+*
+# Except this file
+!.gitignore
+!PSD_gen/
+!src/
+!README.md
+# Empty Data and Plots directories kept deliberately
+!Data/
+!Plots/
