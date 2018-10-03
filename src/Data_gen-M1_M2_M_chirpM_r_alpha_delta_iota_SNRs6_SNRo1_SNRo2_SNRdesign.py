@@ -108,7 +108,7 @@ for RUN in r_extreme['Lower Cutoff'].keys():
     r[RUN] += rl ** 3.
     r[RUN] **= (1. / 3.)
     # We generate array of "r" as Md samples from above distance discretization
-    r[RUN] = np.random.choice(r, Md)
+    r[RUN] = np.random.choice(r[RUN], Md)
 
 # Get the type of distribution as an input (Exact name to be input in str format)
 inp_distri = input('Which distribution to generate data for? (Uniform, log_flat, pow_law)\n: ')
