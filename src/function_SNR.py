@@ -4,15 +4,30 @@ import time
 
 from pycbc.waveform import get_fd_waveform
 import pycbc.filter.matchedfilter as mf
+import pycbc.psd as pp
+import pycbc.types as pt
 
 # Which run?
 # RUN = input('Which run to generate data for? (S6, O1, O2, Design)\n: ')
+
+# Constants
+Msun = 1.989e30			# Mass of Sun in 'kg'
+G = 6.67259e-11			# Gravitational const
+c = 2.99792458e8		# Speed of light in 'm/s'
+Mpc = 3.08568025e22		# Megaparsec in 'm'
+# Array of frequencies
+df = 0.01
+r_extreme = {'Lower Cutoff': {'Design': 1056.*Mpc, 'O1': 179.*Mpc, 'O2': 267.875*Mpc, 'S6': 1.625*Mpc}, 'Upper Cutoff': {'Design': 3452.125*Mpc, 'O1': 964.875*Mpc, 'O2': 1224.375*Mpc, 'S6': 169.*Mpc}}
 
 # Defining a dictionary for detector ASDs and LIGO runs
 # These names will be used to pick ASD files
 detector = {0:'S6_L1', 1:'S6_H1', 2:'O1_L1', 3:'O1_H1', 4:'O2_L1', 5:'O2_H1', 6:'Design_L', 7:'Design_H', 8:'Design_V'}
 # Dictionary to tell which files to pick for a particular run
 for_run = {'S6':[0, 1], 'O1':[2, 3], 'O2':[4, 5], 'Design':[6, 7, 8]}
+
+############# Change f_low #############
+freq = np.arange(20., 1500., df)
+########################################
 
 # To check the time taken for 2D interpolations
 start_time = time.time()
@@ -22,6 +37,10 @@ ASDdata = {}
 # Format : ASDdata = {'S6_H1':<Nx2 ASD data array>, 'O1_L1':<Nx2 ASD data array>}
 for i in detector.keys(): 		#for_run[RUN]:
 	ASDdata[detector[i]] = np.genfromtxt('./../Data/asd_%s.txt' %detector[i], delimiter=",")
+# Dict of PSDs
+PSD_for_det = {}
+for det in detector.keys():
+	PSD_for_det[detector[det]] = pp.read.from_numpy_arrays(ASDdata[detector[det]][:,0], ASDdata[detector[det]][:,1]**2., int(1500/df), delta_f=df, low_freq_cutoff=freq[0])
 
 # ASDdata = np.genfromtxt('./../Data/asd_%s.txt' %detector[0], delimiter=",")
 # for i in detector.keys()[1:]: 		#for_run[RUN]:
@@ -40,19 +59,6 @@ del sky_lookup
 # Printing the time taken for reading and interpolation stuff
 print("Time taken to interpolate: %s seconds" % (time.time() - start_time))
 
-# Constants
-Msun = 1.989e30			# Mass of Sun in 'kg'
-G = 6.67259e-11			# Gravitational const
-c = 2.99792458e8		# Speed of light in 'm/s'
-Mpc = 3.08568025e22		# Megaparsec in 'm'
-# Array of frequencies
-df = 0.01
-r_extreme = {'Lower Cutoff': {'Design': 1056.*Mpc, 'O1': 179.*Mpc, 'O2': 267.875*Mpc, 'S6': 1.625*Mpc}, 'Upper Cutoff': {'Design': 3452.125*Mpc, 'O1': 964.875*Mpc, 'O2': 1224.375*Mpc, 'S6': 169.*Mpc}}
-
-############# Change f_low #############
-freq = np.arange(20., 1500., df)
-########################################
-
 # Initializing an array of integrands for all detectors
 integrand = np.zeros([len(detector), len(freq)])
 # finding integrands for different detectors for all RUNs
@@ -66,6 +72,7 @@ for j in detector.keys():		#for_run[RUN]:
 	integrand[j] = freq ** (-7. / 3.)
 	integrand[j] /= asd_at_freq ** 2.
 	integrand[j] *= df
+
 # clean
 del ASDdata
 # Cumulative sum of rows of integrand matrix along the rows
@@ -105,7 +112,6 @@ def find_simple_SNR(M1, M2, dist):
 		# And taking root to get values of SNR
 		SNRs_for_RUN[RUN] = np.sqrt(SNRs_for_RUN[RUN])
 	return SNRs_for_RUN
-
 
 # Defining a more accurate function which takes array of masses of BHs (in kgs), array of distance (in m), 
 # the right ascension angle-alpha, declination angle-delta and angle between line of sight and 
@@ -155,8 +161,23 @@ def find_SNR(M1, M2, dist, alpha, delta, iota):
 # the right ascension angle-alpha, declination angle-delta and angle between line of sight and 
 # angular momentum vector of binary-iota, to give an array of SNRs
 def find_pycbc_SNR(M1, M2, dist, alpha, delta, iota):
+	SNRs_for_RUN = {}
 	M1 = M1 / Msun
 	M2 = M2 / Msun
 	dist = dist / Mpc
-	sptilde, sctilde = get_fd_waveform(approximant="TaylorF2", mass1=M1, mass2=M2, distance=dist, inclination=iota, delta_f=df, f_lower=freq[0])
-	mf.sigmasq(htilde, psd=None, low_frequency_cutoff=None, high_frequency_cutoff=None)
+	print "m1: {}, m2: {}, r: {}".format(M1, M2, dist)
+	# For each RUN
+	for RUN in for_run.keys():
+		# We get an array of SNRs of the size of M1
+		SNRs_for_RUN[RUN] = np.zeros(len(M1))
+		# Calculation for each binary
+		for i in range(len(M1)):
+			# Strain calculation only for (+) polarization
+			sptilde, _ = get_fd_waveform(approximant="TaylorF2", mass1=M1[i], mass2=M2[i], distance=dist[i], inclination=iota[i], delta_f=df, f_lower=freq[0])
+			# root of sum of sigma squares in individual detectors
+			for det in for_run[RUN]:
+				# SNR in each detector
+				SNRs_for_RUN[RUN][i] += mf.sigmasq(sptilde, psd=PSD_for_det[detector[det]], low_frequency_cutoff=freq[0])
+		# taking root to get values of SNR
+		SNRs_for_RUN[RUN] = np.sqrt(SNRs_for_RUN[RUN])
+	return SNRs_for_RUN
