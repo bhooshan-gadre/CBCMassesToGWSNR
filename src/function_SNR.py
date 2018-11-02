@@ -1,6 +1,7 @@
 import numpy as np
 from scipy import interpolate
 import time
+import h5py
 
 from pycbc.waveform import get_fd_waveform
 import pycbc.filter.matchedfilter as mf
@@ -15,9 +16,13 @@ Msun = 1.989e30			# Mass of Sun in 'kg'
 G = 6.67259e-11			# Gravitational const
 c = 2.99792458e8		# Speed of light in 'm/s'
 Mpc = 3.08568025e22		# Megaparsec in 'm'
+Md = 100000				# No of samples in each distribution
+mass_min = 5.			# Mass Limits in Msun
+mass_max = 95.
+
 # Array of frequencies
-df = 0.01
-r_extreme = {'Lower Cutoff': {'Design': 1056.*Mpc, 'O1': 179.*Mpc, 'O2': 267.875*Mpc, 'S6': 1.625*Mpc}, 'Upper Cutoff': {'Design': 3452.125*Mpc, 'O1': 964.875*Mpc, 'O2': 1224.375*Mpc, 'S6': 169.*Mpc}}
+df = 1./4.
+r_extreme = {'Lower Space Cutoff': {'Design': 1587.82130486 * Mpc, 'S6': 82.77513475 * Mpc, 'O1': 454.18511569 * Mpc, 'O2': 576.59669512 * Mpc}, 'Upper Space Cutoff': {'Design': 3279.12309453 * Mpc, 'S6': 153.40926056 * Mpc, 'O1': 901.50600027 * Mpc, 'O2': 1153.03794345 * Mpc}}
 
 # Defining a dictionary for detector ASDs and LIGO runs
 # These names will be used to pick ASD files
@@ -42,42 +47,43 @@ PSD_for_det = {}
 for det in detector.keys():
 	PSD_for_det[detector[det]] = pp.read.from_numpy_arrays(ASDdata[detector[det]][:,0], ASDdata[detector[det]][:,1]**2., int(1500/df), delta_f=df, low_freq_cutoff=freq[0])
 
-# ASDdata = np.genfromtxt('./../Data/asd_%s.txt' %detector[0], delimiter=",")
-# for i in detector.keys()[1:]: 		#for_run[RUN]:
-# 	ASDdata = np.append(ASDdata, np.genfromtxt('./../Data/asd_%s.txt' %detector[i], delimiter=","), axis=0)
 
-# # ASDdata = np.array(ASDdata)
+############ Below part is needed only for find_SNR and find_simple_SNR ############
 
-# Reading the sky position dependent detector sensitivity data
-# Format of data: alpha, delta, F_plus, F_cross
-sky_lookup = np.genfromtxt('./../Data/H1_allSky_antenna_patterns.dat')
-# 2D Interpolation of data to obtain F+ and Fx functions of right ascension and declination
-find_F_plus = interpolate.interp2d(sky_lookup[:,0], sky_lookup[:,1], sky_lookup[:,2])
-find_F_cross = interpolate.interp2d(sky_lookup[:,0], sky_lookup[:,1], sky_lookup[:,3])
-#clear memory
-del sky_lookup
-# Printing the time taken for reading and interpolation stuff
-print("Time taken to interpolate: %s seconds" % (time.time() - start_time))
+# # Reading the sky position dependent detector sensitivity data
+# # Format of data: alpha, delta, F_plus, F_cross
+# sky_lookup = np.genfromtxt('./../Data/H1_allSky_antenna_patterns.dat')
+# # 2D Interpolation of data to obtain F+ and Fx functions of right ascension and declination
+# find_F_plus = interpolate.interp2d(sky_lookup[:,0], sky_lookup[:,1], sky_lookup[:,2])
+# find_F_cross = interpolate.interp2d(sky_lookup[:,0], sky_lookup[:,1], sky_lookup[:,3])
+# #clear memory
+# del sky_lookup
+# # Printing the time taken for reading and interpolation stuff
+# print("Time taken to interpolate: %s seconds" % (time.time() - start_time))
 
-# Initializing an array of integrands for all detectors
-integrand = np.zeros([len(detector), len(freq)])
-# finding integrands for different detectors for all RUNs
-for j in detector.keys():		#for_run[RUN]:
-	# Interpolating the asd data to obtain an interpolated continuous function of frequency
-	asd = interpolate.interp1d(ASDdata[detector[j]][:, 0], ASDdata[detector[j]][:, 1])
-	# Calculating ASD values at respective elements of frequency array
-	asd_at_freq = asd(freq)
-	# Now the frequency dependent integrand of the SNR calculation is calculated for the entire frequency range.
-	# Only the values till ISCO frequency will be summed up from this array to get the integration.
-	integrand[j] = freq ** (-7. / 3.)
-	integrand[j] /= asd_at_freq ** 2.
-	integrand[j] *= df
+# # Initializing an array of integrands for all detectors
+# integrand = np.zeros([len(detector), len(freq)])
+# # finding integrands for different detectors for all RUNs
+# for j in detector.keys():		#for_run[RUN]:
+# 	# Interpolating the asd data to obtain an interpolated continuous function of frequency
+# 	asd = interpolate.interp1d(ASDdata[detector[j]][:, 0], ASDdata[detector[j]][:, 1])
+# 	# Calculating ASD values at respective elements of frequency array
+# 	asd_at_freq = asd(freq)
+# 	# Now the frequency dependent integrand of the SNR calculation is calculated for the entire frequency range.
+# 	# Only the values till ISCO frequency will be summed up from this array to get the integration.
+# 	integrand[j] = freq ** (-7. / 3.)
+# 	integrand[j] /= asd_at_freq ** 2.
+# 	integrand[j] *= df
 
-# clean
-del ASDdata
-# Cumulative sum of rows of integrand matrix along the rows
-# So that the integration upto a certain ISCO freq will only pick up the value corresponding to the resp index, instead of summing f_low to f_isco everytime
-integrand = np.cumsum(integrand, axis=1)
+# # clean
+# del ASDdata
+# # Cumulative sum of rows of integrand matrix along the rows
+# # So that the integration upto a certain ISCO freq will only pick up the value corresponding to the resp index, instead of summing f_low to f_isco everytime
+# integrand = np.cumsum(integrand, axis=1)
+
+############
+
+
 
 # Defining a simple function which takes arrays of masses of BHs (in kgs), 
 # array of distance (in m) and gives an output array of SNRs
@@ -164,20 +170,63 @@ def find_pycbc_SNR(M1, M2, dist, alpha, delta, iota):
 	SNRs_for_RUN = {}
 	M1 = M1 / Msun
 	M2 = M2 / Msun
-	dist = dist / Mpc
-	print "m1: {}, m2: {}, r: {}".format(M1, M2, dist)
-	# For each RUN
+	# print "m1: {}, m2: {}, r: {}".format(M1, M2, dist)
+	# Making an SNR dictionary for SNR arrays corresponding to diff RUNs
+	SNRs_for_RUN = {}
+	# For each RUN like "O1"
 	for RUN in for_run.keys():
+		Dist = dist[RUN] / Mpc
 		# We get an array of SNRs of the size of M1
 		SNRs_for_RUN[RUN] = np.zeros(len(M1))
 		# Calculation for each binary
 		for i in range(len(M1)):
+			if i == 2:
+				start_t = time.time()
 			# Strain calculation only for (+) polarization
-			sptilde, _ = get_fd_waveform(approximant="TaylorF2", mass1=M1[i], mass2=M2[i], distance=dist[i], inclination=iota[i], delta_f=df, f_lower=freq[0])
+			sptilde, _ = get_fd_waveform(approximant="IMRPhenomD", mass1=M1[i], mass2=M2[i], distance=Dist[i], inclination=iota[i], delta_f=df, f_lower=freq[0], f_final=freq[-1])
+			sptilde.resize(len(PSD_for_det['O1_L1']))
 			# root of sum of sigma squares in individual detectors
 			for det in for_run[RUN]:
 				# SNR in each detector
 				SNRs_for_RUN[RUN][i] += mf.sigmasq(sptilde, psd=PSD_for_det[detector[det]], low_frequency_cutoff=freq[0])
+			if i == 2:
+				print "For {} run, expected time: {} min".format(RUN, (time.time() - start_t) * len(M1) / 60.)
 		# taking root to get values of SNR
 		SNRs_for_RUN[RUN] = np.sqrt(SNRs_for_RUN[RUN])
 	return SNRs_for_RUN
+
+# Find pycbc based SNR from saved templates
+def find_SNR_frm_hdf(path, group):
+	Temps = h5py.File(path, "r")
+	Alpha, Delta, Iota = (Temps["alpha"].value, Temps["delta"].value, Temps["iota"].value)
+	M1 = Temps[group+"/Mass1"].value
+	M2 = Temps[group+"/Mass2"].value
+	M = M2 + M1
+	# Chirp mass array of binary
+	chirpM = (M1 * M2)
+	chirpM **= (3./5.)
+	chirpM /= M ** (1./5.)
+	# table of templates
+	FD_temps = Temps[group+"/templates"]
+	# Dict of distances
+	dist = {}
+	# Making an SNR dictionary for SNR arrays corresponding to diff RUNs
+	SNRs_for_RUN = {}
+	# For each RUN like "O1"
+	for RUN in for_run:
+		# We get an array of SNRs of the size of M1
+		# Initializing
+		SNRs_for_RUN[RUN] = np.zeros(len(FD_temps))
+		# Loading distance array for the specific run
+		dist[RUN] = Temps["Distance/{}".format(RUN)]
+		# Calculation for each binary
+		for j in range(len(FD_temps)):
+			# generating frequency series template
+			sptilde = pt.frequencyseries.FrequencySeries(FD_temps[j], delta_f=df) * 100. * Mpc / dist[RUN][j]
+			# root of sum of sigma squares in individual detectors
+			for det in for_run[RUN]:
+				# SNR in each detector
+				SNRs_for_RUN[RUN][j] += mf.sigmasq(sptilde, psd=PSD_for_det[detector[det]], low_frequency_cutoff=freq[0])
+		# taking root to get values of SNR
+		SNRs_for_RUN[RUN] = np.sqrt(SNRs_for_RUN[RUN])
+	return M1, M2, M, chirpM, dist, Alpha, Delta, Iota, SNRs_for_RUN
