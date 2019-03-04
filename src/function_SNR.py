@@ -22,7 +22,9 @@ mass_max = 95.
 
 # Array of frequencies
 df = 1./4.
-r_extreme = {'Lower Space Cutoff': {'Design': 1587.82130486 * Mpc, 'S6': 82.77513475 * Mpc, 'O1': 454.18511569 * Mpc, 'O2': 576.59669512 * Mpc}, 'Upper Space Cutoff': {'Design': 3279.12309453 * Mpc, 'S6': 153.40926056 * Mpc, 'O1': 901.50600027 * Mpc, 'O2': 1153.03794345 * Mpc}}
+# r_extreme = {'Lower Space Cutoff': {'Design': 1587.82130486 * Mpc, 'S6': 82.77513475 * Mpc, 'O1': 454.18511569 * Mpc, 'O2': 576.59669512 * Mpc}, 'Upper Space Cutoff': {'Design': 3279.12309453 * Mpc, 'S6': 153.40926056 * Mpc, 'O1': 901.50600027 * Mpc, 'O2': 1153.03794345 * Mpc}}
+r_extreme = {'Lower Space Cutoff': {'Design': 273.38516829 * Mpc, 'S6': 12.80446162 * Mpc, 'O1': 72.82472261 * Mpc, 'O2': 91.44922879 * Mpc}, 'Upper Space Cutoff': {'Design': 19063.31247625 * Mpc, 'S6': 994.86000718 * Mpc, 'O1': 5260.97949502 * Mpc, 'O2': 6597.62537123 * Mpc}}
+
 
 # Defining a dictionary for detector ASDs and LIGO runs
 # These names will be used to pick ASD files

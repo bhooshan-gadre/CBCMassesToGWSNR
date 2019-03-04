@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 r = np.array([100.*Mpc])
 r = {'S6':r, 'O1':r, 'O2':r, 'Design':r}
 # limiting masses
-mass_lim = {'Lower Space Cutoff': 50., 'Upper Space Cutoff': 5.}
+# Change: to cover full SNR window and avoid "leaking", we find space limits such that lightest binary at closest distance will give highest SNR and heaviest binary at farthest distance will give lowest SNR
+mass_lim = {'Lower Space Cutoff': 5., 'Upper Space Cutoff': 50.}
 # SNR cutoffs
 cut = {'Lower Space Cutoff': 60., 'Upper Space Cutoff': 5.}
 # dict of SNRs which will contain SNR dicts against cutoffs. These SNR dicts in turn contain SNR arrays corresponding to diff RUNs
