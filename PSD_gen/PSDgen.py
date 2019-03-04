@@ -4,15 +4,15 @@
 # run = 'S6'
 # eventname = 'S6_data'
 
-# run = 'O1'
-# eventname = 'O1_data'
+run = 'O1'
+eventname = 'O1_data'
 # eventname = 'GW150914' 
 #eventname = 'GW151226' 
 #eventname = 'LVT151012'
 
-run = 'O2'
+# run = 'O2'
 # eventname = 'O2_data'
-eventname = 'GW170104'
+# eventname = 'GW170104'
 
 # run = 'Design'
 
@@ -38,7 +38,8 @@ import readligo as rl
 # In[22]:
 # Read the event properties from a local json file
 file_path = "./../Data/"
-fnjson = file_path + "BBH_events_v3.json"
+# fnjson = file_path + "BBH_events_v3.json"
+fnjson = file_path + "BBH_events_after_3March.json"
 try:
     events = json.load(open(fnjson,"r"))
 except IOError:
@@ -129,13 +130,13 @@ if make_plots:
     plt.xlabel('Freq (Hz)')
     plt.legend(loc='upper center')
     plt.title('Advanced LIGO strain data near '+eventname)
-    # plt.savefig(eventname+'_ASDs.'+plottype)
+    plt.savefig(eventname+'_ASDs_3March.'+plottype)
 
 plt.show()
 
 # Save the PSD File
-File_H1 = open((file_path + "asd_%s_H1.txt" %run), 'w')
-File_L1 = open((file_path + "asd_%s_L1.txt" %run), 'w')
+File_H1 = open((file_path + "ASD/asd_%s_H1.txt" %run), 'w')
+File_L1 = open((file_path + "ASD/asd_%s_L1.txt" %run), 'w')
 np.savetxt(File_H1, np.array([freqs, np.sqrt(Pxx_H1)]).transpose(), delimiter=',', newline='\n')
 np.savetxt(File_L1, np.array([freqs, np.sqrt(Pxx_L1)]).transpose(), delimiter=',', newline='\n')
 File_H1.close()
