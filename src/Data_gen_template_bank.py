@@ -58,7 +58,7 @@ for RUN in r_extreme['Lower Space Cutoff'].keys():
     # Defining the visible volume
     vol = 4. / 3. * np.pi * (ru ** 3. - rl ** 3.)
     # From uniform discretization of volume of space, we obtain corresponding discretization of radial distance
-    r[RUN] = np.linspace(0., vol, Md//100)
+    r[RUN] = np.linspace(0., vol, Md//10)
     r[RUN] *= 3. / (4. * np.pi)
     r[RUN] += rl ** 3.
     r[RUN] **= (1. / 3.)
@@ -66,7 +66,7 @@ for RUN in r_extreme['Lower Space Cutoff'].keys():
     r[RUN] = np.random.choice(r[RUN], Md)
 
 # Create HDF5 file
-temps = h5py.File("./../Data/fd_templates_{}.hdf5".format(Md), "a")
+temps = h5py.File("./../Data/fd_templates_{}_3march.hdf5".format(Md), "a")
 distribs = {"Uniform": Uniform, "Log_Flat": log_flat, "Power_Law": pow_law}
 
 Dist = {}
