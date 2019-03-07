@@ -63,7 +63,7 @@ for RUN in ["O1", "O2"]:
 	# Type of distribution
 	for inp_distri in ["Uniform", "Log_Flat", "Power_Law"]:
 		# Reading resp data file into an array
-		dat = np.genfromtxt('./../Data/Data-for-%s-distri_%s_%s_%s.txt' %(inp_distri, int(mass_min), int(mass_max), Md), delimiter=',')
+		dat = np.genfromtxt('./../Data/Data-for-%s-distri_%s_%s_%s_3march.txt' %(inp_distri, int(mass_min), int(mass_max), Md), delimiter=',')
 		# Plot against Total Mass / Chirp Mass / q
 		for mtyp in ["Total Mass", "Chirp Mass"]:
 			plt.figure(figsize=(7, 7))
