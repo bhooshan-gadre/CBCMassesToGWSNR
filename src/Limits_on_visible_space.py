@@ -48,6 +48,9 @@ print r_extreme
 # 'O1': array([454.18511569]),
 # 'O2': array([576.59669512])}}
 
+# New
+# {'Upper Space Cutoff': {'Design': array([19063.31247625]), 'S6': array([994.86000718]), 'O1': array([5260.97949502]), 'O2': array([6597.62537123])}, 'Lower Space Cutoff': {'Design': array([273.38516829]), 'S6': array([12.80446162]), 'O1': array([72.82472261]), 'O2': array([91.44922879])}}
+
 
 # With find_simple_SNR
 # {'Upper Space Cutoff': 
@@ -65,11 +68,11 @@ print r_extreme
 # Plotting
 fig = plt.figure(figsize=(15,10))
 # for all RUNs
-for RUN, colr in zip(r_extreme["Lower Cutoff"].keys(), ["g", "r", "b", "m"]):
+for RUN, colr in zip(r_extreme["Lower Space Cutoff"].keys(), ["g", "r", "b", "m"]):
 	for cutoff in cut.keys():
 		# SNR vs r curves
 		plt.plot(r[RUN]/Mpc, SNRs[cutoff][RUN], colr+"-", label=RUN + ": " + cutoff)
-	plt.fill_between(r[RUN]/Mpc, 0, 100., where=(r[RUN]/Mpc<r_extreme["Upper Cutoff"][RUN]/Mpc) & (r[RUN]/Mpc>r_extreme["Lower Cutoff"][RUN]/Mpc), edgecolor=colr, facecolor=colr, alpha=0.7, label=RUN)
+	plt.fill_between(r[RUN]/Mpc, 0, 100., where=(r[RUN]/Mpc<r_extreme["Upper Space Cutoff"][RUN]/Mpc) & (r[RUN]/Mpc>r_extreme["Lower Space Cutoff"][RUN]/Mpc), edgecolor=colr, facecolor=colr, alpha=0.7, label=RUN)
 plt.xlim(0., 4000.)
 plt.ylim(0., 80.)
 # plt.xscale("log")
@@ -79,5 +82,5 @@ plt.xlabel('Distance (Mpc)')
 plt.ylabel('SNR')
 plt.title("Limits on observable space for different observational runs of LIGO")
 plt.legend(loc="upper right")
-# plt.savefig('./../Plots/Limits_on_space', format='png')
+plt.savefig('./../Plots/Limits_on_space_3March', format='png')
 plt.show()
