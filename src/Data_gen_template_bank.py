@@ -6,7 +6,9 @@ def a_d_i(Md):
     alpha = np.random.uniform(0., 2.*np.pi, Md)
     delta = np.random.uniform(-np.pi/2., np.pi/2., Md)
     iota = np.random.uniform(0., np.pi, Md)
-    return alpha, delta, iota
+    spin1 = np.random.uniform(-0.99, 0.99, Md)
+    spin2 = np.random.uniform(-0.99, 0.99, Md)
+    return alpha, delta, iota, spin1, spin2
 # Calculating data for uniform distribution
 def Uniform(Md, m_min, m_max):
     # Uniform component masses
@@ -74,10 +76,12 @@ for RUN in r_extreme['Lower Space Cutoff'].keys():
 	Dist[RUN] = temps.create_dataset("Distance/{}".format(RUN), data=r[RUN])
 
 # Random sky position and orientation
-alpha, delta, iota = a_d_i(Md)
+alpha, delta, iota, spin1, spin2 = a_d_i(Md)
 Iota = temps.create_dataset("iota", data=iota)
 temps.create_dataset("alpha", data=alpha)
 temps.create_dataset("delta", data=delta)
+Spin1 = temps.create_dataset("spin1", data=spin1)
+Spin2 = temps.create_dataset("spin2", data=spin2)
 
 for distrib in distribs.keys():
     print distrib
@@ -90,9 +94,11 @@ for distrib in distribs.keys():
     # Templates in FD to be saved for dist=100 Mpc
     temps_in_distrib = in_distrib.create_dataset("templates", (Md, len(PSD_for_det['O1_L1'])), dtype='c16')
     # Filling the frequency series values
-    for m1, m2, io, i in zip(Mass1, Mass2, Iota, range(Md)):
-    	# Get each template
-    	sptilde, _ = get_fd_waveform(approximant="IMRPhenomD", mass1=m1, mass2=m2, distance=100., inclination=io, delta_f=df, f_lower=freq[0], f_final=freq[-1])
-    	sptilde.resize(len(PSD_for_det['O1_L1']))
-    	temps_in_distrib[i] = np.array(sptilde.data)
-    	print i
+    for m1, m2, io, i, s1, s2 in zip(Mass1, Mass2, Iota, range(Md), Spin1, Spin2):
+        # Get each template
+        sptilde, _ = get_fd_waveform(approximant="IMRPhenomD", mass1=m1, mass2=m2, spin1z=s1, spin2z=s2, distance=100., inclination=io, delta_f=df, f_lower=freq[0], f_final=freq[-1])
+        sptilde.resize(len(PSD_for_det['O1_L1']))
+        temps_in_distrib[i] = np.array(sptilde.data)
+        print distrib, i
+
+temps.close()
