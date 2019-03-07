@@ -4,14 +4,14 @@
 # run = 'S6'
 # eventname = 'S6_data'
 
-run = 'O1'
-eventname = 'O1_data'
+# run = 'O1'
+# eventname = 'O1_data'
 # eventname = 'GW150914' 
 #eventname = 'GW151226' 
 #eventname = 'LVT151012'
 
-# run = 'O2'
-# eventname = 'O2_data'
+run = 'O2'
+eventname = 'O2_data'
 # eventname = 'GW170104'
 
 # run = 'Design'
@@ -135,8 +135,8 @@ if make_plots:
 plt.show()
 
 # Save the PSD File
-File_H1 = open((file_path + "ASD/asd_%s_H1.txt" %run), 'w')
-File_L1 = open((file_path + "ASD/asd_%s_L1.txt" %run), 'w')
+File_H1 = open((file_path + "asd_%s_H1.txt" %run), 'w')
+File_L1 = open((file_path + "asd_%s_L1.txt" %run), 'w')
 np.savetxt(File_H1, np.array([freqs, np.sqrt(Pxx_H1)]).transpose(), delimiter=',', newline='\n')
 np.savetxt(File_L1, np.array([freqs, np.sqrt(Pxx_L1)]).transpose(), delimiter=',', newline='\n')
 File_H1.close()
