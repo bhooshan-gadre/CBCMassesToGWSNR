@@ -54,7 +54,7 @@ annot_y = 0.026     # Has to be adjusted manually
 event_col = 'r'
 
 # line width
-lwid = 3
+lwid = 1
 # fontsize
 fsiz = 13
 
@@ -63,7 +63,7 @@ for RUN in ["O1", "O2"]:
 	# Type of distribution
 	for inp_distri in ["Uniform", "Log_Flat", "Power_Law"]:
 		# Reading resp data file into an array
-		dat = np.genfromtxt('./../Data/Data-for-%s-distri_%s_%s_%s_3march.txt' %(inp_distri, int(mass_min), int(mass_max), Md), delimiter=',')
+		dat = np.genfromtxt('./../Data/Data-for-%s-distri_%s_%s_%s_10march.txt' %(inp_distri, int(mass_min), int(mass_max), Md), delimiter=',')
 		# Plot against Total Mass / Chirp Mass / q
 		for mtyp in ["Total Mass", "Chirp Mass"]:
 			plt.figure(figsize=(7, 7))
@@ -84,7 +84,7 @@ for RUN in ["O1", "O2"]:
 			plt.ylabel('Probability of Detection', fontsize=fsiz, fontweight='bold')
 			# plt.title('Probability of Detection Vs. %s \n(Distribution: %s)' %(mtyp, inp_distri), fontsize=fsiz, fontweight='bold')
 			plt.title('Run: %s, Distribution: %s' %(RUN, inp_distri), fontsize=fsiz, fontweight='bold')
-			plt.legend(loc='upper right', fontsize=fsiz)
+			plt.legend(loc='upper left', fontsize=fsiz)
 			# plt.axes([0., 100., 0., 1.])
 			# if mtyp == "Chirp Mass":
 			#     plt.xlim([0., 50.])
@@ -92,7 +92,7 @@ for RUN in ["O1", "O2"]:
 			# else:
 			#     plt.xlim([0., 100.])
 			#     plt.ylim([0., 0.02])
-			plt.savefig('./../Plots/bold_PDF_%s-%s-%s_%s_%s_%s.png' %(RUN, mtyp, inp_distri, int(mass_min), int(mass_max), Md))
+			plt.savefig('./../Plots/march10_PDF_%s-%s-%s_%s_%s_%s.png' %(RUN, mtyp, inp_distri, int(mass_min), int(mass_max), Md))
 			plt.show()
 
 

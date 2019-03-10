@@ -16,7 +16,8 @@ Msun = 1.989e30			# Mass of Sun in 'kg'
 G = 6.67259e-11			# Gravitational const
 c = 2.99792458e8		# Speed of light in 'm/s'
 Mpc = 3.08568025e22		# Megaparsec in 'm'
-Md = 100000				# No of samples in each distribution
+Md = 1000000			# No of samples in each distribution
+Iterations = 10			# No of iterations for which the saved set of templates will be used with shuffled distances
 mass_min = 5.			# Mass Limits in Msun
 mass_max = 95.
 
@@ -198,7 +199,7 @@ def find_pycbc_SNR(M1, M2, dist, alpha, delta, iota):
 	return SNRs_for_RUN
 
 # Find pycbc based SNR from saved templates
-def find_SNR_frm_hdf(path, group):
+def find_SNR_frm_hdf(path, group, iters):
 	Temps = h5py.File(path, "r")
 	Alpha, Delta, Iota = (Temps["alpha"].value, Temps["delta"].value, Temps["iota"].value)
 	M1 = Temps[group+"/Mass1"].value
@@ -216,19 +217,24 @@ def find_SNR_frm_hdf(path, group):
 	SNRs_for_RUN = {}
 	# For each RUN like "O1"
 	for RUN in for_run:
+		print "RUN: {}".format(RUN)
 		# We get an array of SNRs of the size of M1
 		# Initializing
-		SNRs_for_RUN[RUN] = np.zeros(len(FD_temps))
+		SNRs_for_RUN[RUN] = np.zeros(len(FD_temps)*iters)
 		# Loading distance array for the specific run
 		dist[RUN] = Temps["Distance/{}".format(RUN)]
-		# Calculation for each binary
-		for j in range(len(FD_temps)):
-			# generating frequency series template
-			sptilde = pt.frequencyseries.FrequencySeries(FD_temps[j], delta_f=df) * 100. * Mpc / dist[RUN][j]
-			# root of sum of sigma squares in individual detectors
-			for det in for_run[RUN]:
-				# SNR in each detector
-				SNRs_for_RUN[RUN][j] += mf.sigmasq(sptilde, psd=PSD_for_det[detector[det]], low_frequency_cutoff=freq[0])
+		# For 'iters' number of iterations, the template set will be used with shuffled distances
+		for itr in np.arange(iters):
+			# Calculation for each binary
+			for j in range(len(FD_temps)):
+				if j % 100 == 0:
+					print "{} / {}".format(j+len(FD_temps)*itr, len(FD_temps)*iters)
+				# generating frequency series template
+				sptilde = pt.frequencyseries.FrequencySeries(FD_temps[j], delta_f=df) * 100. * Mpc / dist[RUN][j+len(FD_temps)*itr]
+				# root of sum of sigma squares in individual detectors
+				for det in for_run[RUN]:
+					# SNR in each detector
+					SNRs_for_RUN[RUN][j+len(FD_temps)*itr] += mf.sigmasq(sptilde, psd=PSD_for_det[detector[det]], low_frequency_cutoff=freq[0])
 		# taking root to get values of SNR
 		SNRs_for_RUN[RUN] = np.sqrt(SNRs_for_RUN[RUN])
-	return M1, M2, M, chirpM, dist, Alpha, Delta, Iota, SNRs_for_RUN
+	return np.tile(M1, iters), np.tile(M2, iters), np.tile(M, iters), np.tile(chirpM, iters), dist, np.tile(Alpha, iters), np.tile(Delta, iters), np.tile(Iota, iters), SNRs_for_RUN
