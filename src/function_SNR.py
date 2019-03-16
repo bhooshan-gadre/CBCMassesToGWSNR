@@ -7,6 +7,7 @@ from pycbc.waveform import get_fd_waveform
 import pycbc.filter.matchedfilter as mf
 import pycbc.psd as pp
 import pycbc.types as pt
+from pycbc.population.scale_injections import dlum_to_z
 
 # Which run?
 # RUN = input('Which run to generate data for? (S6, O1, O2, Design)\n: ')
@@ -211,8 +212,9 @@ def find_SNR_frm_hdf(path, group, iters):
 	chirpM /= M ** (1./5.)
 	# table of templates
 	FD_temps = Temps[group+"/templates"]
-	# Dict of distances
+	# Dict of distances, and redshifts
 	dist = {}
+	z = {}
 	# Making an SNR dictionary for SNR arrays corresponding to diff RUNs
 	SNRs_for_RUN = {}
 	# For each RUN like "O1"
@@ -223,6 +225,8 @@ def find_SNR_frm_hdf(path, group, iters):
 		SNRs_for_RUN[RUN] = np.zeros(len(FD_temps)*iters)
 		# Loading distance array for the specific run
 		dist[RUN] = Temps["Distance/{}".format(RUN)]
+		# Corresponding redshifts
+		z[RUN] = dlum_to_z(dist[RUN].value/Mpc)
 		# For 'iters' number of iterations, the template set will be used with shuffled distances
 		for itr in np.arange(iters):
 			# Calculation for each binary
@@ -231,6 +235,18 @@ def find_SNR_frm_hdf(path, group, iters):
 					print "{} / {}".format(j+len(FD_temps)*itr, len(FD_temps)*iters)
 				# generating frequency series template
 				sptilde = pt.frequencyseries.FrequencySeries(FD_temps[j], delta_f=df) * 100. * Mpc / dist[RUN][j+len(FD_temps)*itr]
+				# sample freq values
+				temp_sample_freqs = sptilde.sample_frequencies.data
+				# redshifted freqs will map as f -> f/(1+z)
+				f_red = temp_sample_freqs/(1. + z[RUN][j+len(FD_temps)*itr])
+				# Appending the redshifted frequencies till the end of prev frequency array i.e. freq[-1]
+				f_red_ext = np.append(f_red, np.linspace(f_red[-1], temp_sample_freqs[-1], 1000)[1:])
+				# appending the sptilde values with equal no of zeros
+				sptilde_ext = np.append(sptilde.data, np.zeros(999))
+				# interpolation function
+				sp_at_redshifted_f = interpolate.interp1d(f_red_ext, sptilde_ext)
+				# interpolated sptilde values 
+				sptilde.data = sp_at_redshifted_f(temp_sample_freqs)
 				# root of sum of sigma squares in individual detectors
 				for det in for_run[RUN]:
 					# SNR in each detector

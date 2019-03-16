@@ -46,7 +46,7 @@ mass_min = 5.
 mass_max = 95.
 
 # no of bins
-nbins = 30
+nbins = 20
 # Runs: 'S6', 'O1', 'O2', 'Design'
 SNR_max = 60.
 # Annotation y coordinate placing
@@ -63,7 +63,7 @@ for RUN in ["O1", "O2"]:
 	# Type of distribution
 	for inp_distri in ["Uniform", "Log_Flat", "Power_Law"]:
 		# Reading resp data file into an array
-		dat = np.genfromtxt('./../Data/Data-for-%s-distri_%s_%s_%s_10march.txt' %(inp_distri, int(mass_min), int(mass_max), Md), delimiter=',')
+		dat = np.loadtxt('./../Data/Data-for-%s-distri_%s_%s_%s_10march_with_z.txt' %(inp_distri, int(mass_min), int(mass_max), Md*10), delimiter=',')
 		# Plot against Total Mass / Chirp Mass / q
 		for mtyp in ["Total Mass", "Chirp Mass"]:
 			plt.figure(figsize=(7, 7))
@@ -92,8 +92,8 @@ for RUN in ["O1", "O2"]:
 			# else:
 			#     plt.xlim([0., 100.])
 			#     plt.ylim([0., 0.02])
-			plt.savefig('./../Plots/march10_PDF_%s-%s-%s_%s_%s_%s.png' %(RUN, mtyp, inp_distri, int(mass_min), int(mass_max), Md))
-			plt.show()
+			plt.savefig('./../Plots/march10_PDF_%s-%s-%s_%s_%s_%s_with_z.png' %(RUN, mtyp, inp_distri, int(mass_min), int(mass_max), Md*10))
+			# plt.show()
 
 
 
