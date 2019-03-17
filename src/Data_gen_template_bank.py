@@ -68,7 +68,7 @@ for RUN in r_extreme['Lower Space Cutoff'].keys():
     r[RUN] = np.random.choice(r[RUN], Md*Iterations)
 
 # Create HDF5 file
-temps = h5py.File("./../Data/fd_templates_{}_10march.hdf5".format(Md), "a")
+temps = h5py.File("./../Data/fd_templates_{}{}.hdf5".format(Md, fd_temps_file_suffix), "a")
 distribs = {"Uniform": Uniform, "Log_Flat": log_flat, "Power_Law": pow_law}
 
 Dist = {}

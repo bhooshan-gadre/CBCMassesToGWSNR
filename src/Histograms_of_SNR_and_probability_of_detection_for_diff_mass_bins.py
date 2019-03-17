@@ -14,7 +14,7 @@ def param_in_SNR_range(data, Run, SNRmin, SNRmax):
 	else: param_vals = param_vals[:, Dict[mtyp]]
 	return param_vals, data[i_accpt, :][:, run_dict[Run]]
 
-Md = 100000
+Md = 1000000
 # Mass of Sun
 Msun = 1.989e30
 # Dictionary to identify the input mtyp
@@ -45,6 +45,9 @@ run_dict = {'S6': 11, 'O1': 12, 'O2': 13, 'Design': 14}
 mass_min = 5.
 mass_max = 95.
 
+# file names
+data_file_suffix = '_10march_with_z'
+
 # no of bins
 nbins = 20
 # Runs: 'S6', 'O1', 'O2', 'Design'
@@ -63,7 +66,7 @@ for RUN in ["O1", "O2"]:
 	# Type of distribution
 	for inp_distri in ["Uniform", "Log_Flat", "Power_Law"]:
 		# Reading resp data file into an array
-		dat = np.loadtxt('./../Data/Data-for-%s-distri_%s_%s_%s_10march_with_z.txt' %(inp_distri, int(mass_min), int(mass_max), Md*10), delimiter=',')
+		dat = np.loadtxt('./../Data/Data-for-%s-distri_%s_%s_%s%s.txt' %(inp_distri, int(mass_min), int(mass_max), Md, data_file_suffix), delimiter=',')
 		# Plot against Total Mass / Chirp Mass / q
 		for mtyp in ["Total Mass", "Chirp Mass"]:
 			plt.figure(figsize=(7, 7))
@@ -92,7 +95,7 @@ for RUN in ["O1", "O2"]:
 			# else:
 			#     plt.xlim([0., 100.])
 			#     plt.ylim([0., 0.02])
-			plt.savefig('./../Plots/march10_PDF_%s-%s-%s_%s_%s_%s_with_z.png' %(RUN, mtyp, inp_distri, int(mass_min), int(mass_max), Md*10))
+			plt.savefig('./../Plots/march10_PDF_%s-%s-%s_%s_%s_%s%s.png' %(RUN, mtyp, inp_distri, int(mass_min), int(mass_max), Md, data_file_suffix))
 			# plt.show()
 
 

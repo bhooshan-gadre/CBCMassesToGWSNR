@@ -1,7 +1,6 @@
 from function_SNR import *
 
-
-Path = "./../Data/fd_templates_{}_10march.hdf5".format(Md)
+Path = "./../Data/fd_templates_{}{}.hdf5".format(Md, fd_temps_file_suffix)
 
 # for Group in ["Uniform", "Log_Flat", "Power_Law"]:
 Group = input("Distribution (Uniform, Log_Flat, Power_Law): \n")
@@ -10,7 +9,7 @@ m1, m2, M, chirpM, r, alpha, delta, iota, SNR_for_RUN = find_SNR_frm_hdf(Path, G
 data = np.array([m1, m2, M, chirpM, r['S6'], r['O1'], r['O2'], r['Design'], alpha, delta, iota, SNR_for_RUN['S6'], SNR_for_RUN['O1'], SNR_for_RUN['O2'], SNR_for_RUN['Design']]).transpose()
 # We sort the data such that the rows are sorted with descending value of chirp masses of binaries
 data = data[data[:,3].argsort()]
-rf = open('./../Data/Data-for-%s-distri_%s_%s_%s_10march_with_z.txt' %(Group, int(mass_min), int(mass_max), Md), 'w')
+rf = open('./../Data/Data-for-%s-distri_%s_%s_%s%s.txt' %(Group, int(mass_min), int(mass_max), Md, data_file_suffix), 'w')
 title = 'BH1 Mass (kg), BH2 Mass (kg), Total Mass (kg), Chirp Mass(kg), Distance_S6 (m), Distance_O1 (m), Distance_O2 (m), Distance_Design (m), alpha, delta, iota, SNR_S6, SNR_O1, SNR_O2, SNR_Design'
 np.savetxt(rf, data, delimiter=',', header=title, newline='\n')
 rf.close()

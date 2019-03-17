@@ -27,12 +27,16 @@ df = 1./4.
 # r_extreme = {'Lower Space Cutoff': {'Design': 1587.82130486 * Mpc, 'S6': 82.77513475 * Mpc, 'O1': 454.18511569 * Mpc, 'O2': 576.59669512 * Mpc}, 'Upper Space Cutoff': {'Design': 3279.12309453 * Mpc, 'S6': 153.40926056 * Mpc, 'O1': 901.50600027 * Mpc, 'O2': 1153.03794345 * Mpc}}
 r_extreme = {'Lower Space Cutoff': {'Design': 273.38516829 * Mpc, 'S6': 12.80446162 * Mpc, 'O1': 72.82472261 * Mpc, 'O2': 91.44922879 * Mpc}, 'Upper Space Cutoff': {'Design': 19063.31247625 * Mpc, 'S6': 994.86000718 * Mpc, 'O1': 5260.97949502 * Mpc, 'O2': 6597.62537123 * Mpc}}
 
+# file names
+fd_temps_file_suffix = '_10march'
+data_file_suffix = '_10march_with_z'
 
 # Defining a dictionary for detector ASDs and LIGO runs
 # These names will be used to pick ASD files
 detector = {0:'S6_L1', 1:'S6_H1', 2:'O1_L1', 3:'O1_H1', 4:'O2_L1', 5:'O2_H1', 6:'Design_L', 7:'Design_H', 8:'Design_V'}
 # Dictionary to tell which files to pick for a particular run
-for_run = {'S6':[0, 1], 'O1':[2, 3], 'O2':[4, 5], 'Design':[6, 7, 8]}
+# for_run = {'S6':[0, 1], 'O1':[2, 3], 'O2':[4, 5], 'Design':[6, 7, 8]}
+for_run = {'O1':[2, 3], 'O2':[4, 5], 'Design':[6, 7]}
 
 ############# Change f_low #############
 freq = np.arange(20., 1500., df)
@@ -231,8 +235,8 @@ def find_SNR_frm_hdf(path, group, iters):
 		for itr in np.arange(iters):
 			# Calculation for each binary
 			for j in range(len(FD_temps)):
-				if j % 100 == 0:
-					print "{} / {}".format(j+len(FD_temps)*itr, len(FD_temps)*iters)
+				if j % 1000 == 0:
+					print "{} : {} / {}".format(RUN, j+len(FD_temps)*itr, len(FD_temps)*iters)
 				# generating frequency series template
 				sptilde = pt.frequencyseries.FrequencySeries(FD_temps[j], delta_f=df) * 100. * Mpc / dist[RUN][j+len(FD_temps)*itr]
 				# sample freq values
