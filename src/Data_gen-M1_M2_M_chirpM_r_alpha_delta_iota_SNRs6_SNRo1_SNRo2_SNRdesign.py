@@ -6,7 +6,7 @@ Path = "./../Data/fd_templates_{}{}.hdf5".format(Md, fd_temps_file_suffix)
 Group = input("Distribution (Uniform, Log_Flat, Power_Law): \n")
 print Group
 m1, m2, M, chirpM, r, alpha, delta, iota, SNR_for_RUN = find_SNR_frm_hdf(Path, Group, Iterations)
-data = np.array([m1, m2, M, chirpM, r['S6'], r['O1'], r['O2'], r['Design'], alpha, delta, iota, SNR_for_RUN['S6'], SNR_for_RUN['O1'], SNR_for_RUN['O2'], SNR_for_RUN['Design']]).transpose()
+data = np.array([m1, m2, M, chirpM, np.zeros(len(r['O1'])), r['O1'], r['O2'], r['Design'], alpha, delta, iota, np.zeros(len(SNR_for_RUN['O1'])), SNR_for_RUN['O1'], SNR_for_RUN['O2'], SNR_for_RUN['Design']]).transpose()
 # We sort the data such that the rows are sorted with descending value of chirp masses of binaries
 data = data[data[:,3].argsort()]
 rf = open('./../Data/Data-for-%s-distri_%s_%s_%s%s.txt' %(Group, int(mass_min), int(mass_max), Md, data_file_suffix), 'w')
